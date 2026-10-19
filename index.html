@@ -89,19 +89,19 @@ h1{font-size:clamp(22px,4.4vw,30px);line-height:1.15;margin:0 0 8px;color:var(--
 <div class="dt" id="dt" aria-live="polite"></div>
 </div>
 <div class="note"><p id="upd"></p><details><summary>How to read this</summary><ul>
-<li><b>Hot, warm, normal, cool, cold:</b> prices are compared with the central bank's own inflation target. Jobs and growth are compared with that country's own last 10 years: the middle half of readings counts as normal, and the further outside it, the hotter or cooler.</li>
-<li><b>Prices</b> are the headline consumer price index, shown as the change over the last 12 months. <b>Jobs</b> is the unemployment rate, so a lower rate counts as hotter. <b>Growth</b> is how much bigger the economy is than a year ago, after inflation.</li>
-<li><b>Targets used:</b> 2% for the US, euro area, UK, Japan, Norway and Sweden (normal is 1.5 to 2.5%), 1 to 3% for Canada and New Zealand, 2 to 3% for Australia and 0 to 2% for Switzerland. The Fed targets a slightly different measure of inflation (PCE) that usually runs a little lower than the CPI shown here.</li>
+<li><b>Hot, warm, in line, cool, cold:</b> prices are compared with the central bank's own inflation target. Unemployment and growth are compared with that country's last 10 years. If the latest reading falls within the middle half of those readings it is rated "in line", and the further outside it falls, the hotter or colder it is rated.</li>
+<li><b>Prices</b> are headline consumer price inflation, the change over the last 12 months. <b>Jobs</b> is the unemployment rate, so low unemployment counts as hot. <b>Growth</b> is GDP growth on the previous quarter, after inflation and not annualised, so US figures look smaller than the annualised number usually quoted.</li>
+<li><b>Targets used:</b> 2% for the US, euro area, UK, Japan, Norway and Sweden (within half a point of the target counts as in line), 1 to 3% for Canada and New Zealand, 2 to 3% for Australia and 0 to 2% for Switzerland. The Fed targets a slightly different measure of inflation (PCE) that usually runs a little lower than the CPI shown here.</li>
 <li><b>Timing:</b> each figure is the latest published, so the dates differ between countries and indicators. Some are a few months old. Unemployment follows the international survey-based definition, so the Swiss figure is higher than the registered rate quoted locally.</li>
-<li><b>Interest rate:</b> the central bank's main policy rate. For the US it is the middle of the Fed's target range. "Usually" matters: central banks look at many things, and this is a summary, not a forecast. Not trading advice.</li>
+<li><b>Interest rate:</b> the central bank's main policy rate. For the US it is the upper end of the Fed's target range. "Usually" matters: central banks look at many things, and this is a summary, not a forecast. Not trading advice.</li>
 <li><b>Sources:</b> Bank for International Settlements, OECD and national statistics offices via FRED, Eurostat and the US Bureau of Economic Analysis.</li></ul></details></div>
 <a class="cta" href="https://newsquawk.com">Take a 1-week trial → newsquawk.com</a>
 </div>
 <script>
 var $=function(i){return document.getElementById(i)};
 var SC={cold:-2,cool:-1,normal:0,warm:1,hot:2};
-var W={hot:"Hot",warm:"Warm",normal:"Normal",cool:"Cool",cold:"Cold"};
-var VW={hot:"Running hot",warm:"Running warm",normal:"About normal",cool:"Running cool",cold:"Running cold"};
+var W={hot:"Hot",warm:"Warm",normal:"In line",cool:"Cool",cold:"Cold"};
+var VW={hot:"Running hot",warm:"Running warm",normal:"Balanced",cool:"Running cool",cold:"Running cold"};
 var D=null,sel=0;
 function num(x,min){var s=(+x).toFixed(3).replace(/0+$/,"").replace(/\.$/,"");var d=(s.split(".")[1]||"").length;return d<min?(+x).toFixed(min):s}
 function f1(x){return (+x).toFixed(1)}
@@ -117,10 +117,10 @@ function strip(title,b,detail,left,right,zoneText){
  return '<div class="g"><div class="gt"><b>'+title+'<span class="v '+b.state+'">'+W[b.state]+'</span></b><span>'+detail+" ("+esc(b.asof_label)+")"+old+'</span></div>'+
  '<div class="bar"><div class="zone" style="left:'+b.zone_l+'%;width:'+(b.zone_r-b.zone_l)+'%"></div><div class="zl" style="left:'+((b.zone_l+b.zone_r)/2)+'%">'+zoneText+'</div><div class="mk'+cls+'" style="left:'+pos+'%"><div class="mv">'+f1(b.value)+'%</div></div></div>'+
  '<div class="ends"><span>'+left+'</span><span>'+right+'</span></div></div>'}
-var PT={hot:"much faster than the central bank wants",warm:"a bit faster than the central bank wants",normal:"at about the pace the central bank wants",cool:"more slowly than the central bank wants",cold:"much more slowly than the central bank wants"};
-var JT={hot:"Jobs are very plentiful",warm:"Jobs are plentiful",normal:"The job market is about normal",cool:"Jobs are getting scarcer",cold:"Jobs are scarce"};
-var GT={hot:"The economy is growing unusually fast",warm:"The economy is growing strongly",normal:"Growth is about normal",cool:"Growth is soft",cold:"Growth is very weak"};
-function summary(c){if(!(c.prices&&c.jobs&&c.growth))return "";return "Prices are rising "+PT[c.prices.state]+". "+JT[c.jobs.state]+". "+GT[c.growth.state]+"."}
+var PT={hot:"Inflation is well above the central bank's target",warm:"Inflation is above the central bank's target",normal:"Inflation is in line with the central bank's target",cool:"Inflation is below the central bank's target",cold:"Inflation is well below the central bank's target"};
+var JT={hot:"Unemployment is very low",warm:"Unemployment is low",normal:"Unemployment is in line with its 10-year average",cool:"Unemployment is high",cold:"Unemployment is very high"};
+var GT={hot:"Growth is unusually strong",warm:"Growth is strong",normal:"Growth is in line with its 10-year average",cool:"Growth is weak",cold:"Growth is very weak"};
+function summary(c){if(!(c.prices&&c.jobs&&c.growth))return "";return PT[c.prices.state]+". "+JT[c.jobs.state]+". "+GT[c.growth.state]+"."}
 function meaning(c){if(!(c.prices&&c.jobs&&c.growth))return "";
  var ps=SC[c.prices.state],as=(SC[c.jobs.state]+SC[c.growth.state])/2;
  if(ps>=1)return as>=0?"With prices high and the economy solid, central banks usually keep rates high, or raise them.":"Prices are high but the economy is softening, which is a hard spot. Central banks have to weigh fighting inflation against supporting growth.";
@@ -129,16 +129,16 @@ function meaning(c){if(!(c.prices&&c.jobs&&c.growth))return "";
  if(as<=-1)return "The economy is soft with prices on target, so central banks usually lean towards lower rates.";
  return "Things look fairly balanced, so central banks usually have little reason to change rates."}
 function rateBox(c){if(!c.rate)return "";var r=c.rate,ch=r.last_change,t;
- if(ch)t=(ch.delta>0?"Raised ":"Cut ")+num(Math.abs(ch.delta),0)+" points in "+esc(ch.asof_label);else t="No change since "+esc(r.since_label);
+ if(ch)t=esc(c.bank_short||"The central bank")+(ch.bp>0?" raised":" cut")+" rates by "+Math.abs(ch.bp)+"bp in "+esc(ch.asof_label);else t="No change since "+esc(r.since_label);
  var m=meaning(c);
- return '<div class="rate"><div class="n">'+num(r.value,2)+'%</div><div><p><b>'+esc(c.bank)+" interest rate</b> · "+t+"</p>"+(m?'<small>What this usually means</small><p>'+m+"</p>":"")+"</div></div>"}
+ return '<div class="rate"><div class="n">'+num(r.value,2)+'%</div><div><p><b>'+esc(c.bank)+" interest rate</b></p><p>"+t+"</p>"+(m?'<small>What this usually means</small><p>'+m+"</p>":"")+"</div></div>"}
 function detail(){var c=D.countries[sel];if(!c){$("dt").innerHTML="";return}
  var p=c.prices,j=c.jobs,g=c.growth;
  var h='<div class="dh"><b>'+esc(c.name)+"</b>"+(c.verdict?'<span class="vd '+c.verdict+'">'+VW[c.verdict]+"</span>":"")+"</div>";
  var s=summary(c);if(s)h+='<p class="sum">'+s+"</p>";
- h+=strip("Prices",p,p?"Inflation "+f1(p.value)+"% a year. Target: "+esc(p.target):"","Prices rising slowly","Prices rising fast",p?"target "+esc(p.target):"");
- h+=strip("Jobs",j,j?"Unemployment "+f1(j.value)+"%. Usual: "+f1(j.usual_lo)+" to "+f1(j.usual_hi)+"%":"","Jobs scarce","Jobs plentiful","usual");
- h+=strip("Growth",g,g?"Economy "+f1(Math.abs(g.value))+"% "+(g.value<0?"smaller":"bigger")+" than a year ago. Usual: "+f1(g.usual_lo)+" to "+f1(g.usual_hi)+"%":"","Shrinking","Booming","usual");
+ h+=strip("Prices",p,p?"Inflation "+f1(p.value)+"% year on year. Target: "+esc(p.target):"","Low inflation","High inflation",p?"target "+esc(p.target):"");
+ h+=strip("Jobs",j,j?"Unemployment "+f1(j.value)+"%. Typical 10-year range: "+f1(j.range_lo)+" to "+f1(j.range_hi)+"%":"","High unemployment","Low unemployment","typical range");
+ h+=strip("Growth",g,g?"GDP "+(g.value<0?"shrank ":"grew ")+f1(Math.abs(g.value))+"% on the previous quarter. Typical 10-year range: "+f1(g.range_lo)+" to "+f1(g.range_hi)+"%":"","Weak growth","Strong growth","typical range");
  h+=rateBox(c);$("dt").innerHTML=h}
 function render(){if(!D||!D.countries||!D.countries.length){$("ov").innerHTML='<p class="empty">The first data update has not run yet. Check back soon.</p>';$("dt").innerHTML="";return}
  $("demo").className="demo"+(D.demo?" on":"");
