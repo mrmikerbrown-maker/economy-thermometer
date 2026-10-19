@@ -1,1 +1,607 @@
-{"generated": null, "demo": false, "countries": []}
+{
+ "generated": "2026-10-19T14:04:05Z",
+ "demo": false,
+ "history_years": 10,
+ "countries": [
+  {
+   "code": "US",
+   "name": "United States",
+   "short": "US",
+   "bank": "Federal Reserve",
+   "prices": {
+    "value": 3.4,
+    "asof": "2026-08",
+    "asof_label": "Aug 2026",
+    "state": "warm",
+    "target": "2%",
+    "usual_lo": 1.5,
+    "usual_hi": 2.5,
+    "pos": 55.0,
+    "zone_l": 31.2,
+    "zone_r": 43.8,
+    "kept": false,
+    "stale": false
+   },
+   "jobs": {
+    "value": 4.2,
+    "asof": "2026-09",
+    "asof_label": "Sep 2026",
+    "state": "normal",
+    "usual_lo": 3.7,
+    "usual_hi": 4.4,
+    "pos": 71.2,
+    "zone_l": 67.1,
+    "zone_r": 81.6,
+    "kept": false,
+    "stale": false
+   },
+   "growth": {
+    "value": 2.19,
+    "asof": "2026-Q2",
+    "asof_label": "Q2 2026",
+    "state": "normal",
+    "usual_lo": 2.12,
+    "usual_hi": 3.14,
+    "pos": 50.2,
+    "zone_l": 49.3,
+    "zone_r": 61.1,
+    "kept": false,
+    "stale": false
+   },
+   "rate": {
+    "value": 3.875,
+    "asof": "2026-09",
+    "asof_label": "Sep 2026",
+    "last_change": {
+     "asof": "2026-09",
+     "asof_label": "Sep 2026",
+     "delta": 0.25
+    },
+    "since_label": "Jan 2021",
+    "kept": false
+   },
+   "score": 0.33,
+   "verdict": "normal"
+  },
+  {
+   "code": "EA",
+   "name": "Eurozone",
+   "short": "Eurozone",
+   "bank": "European Central Bank",
+   "prices": {
+    "value": 3.25,
+    "asof": "2026-08",
+    "asof_label": "Aug 2026",
+    "state": "warm",
+    "target": "2%",
+    "usual_lo": 1.5,
+    "usual_hi": 2.5,
+    "pos": 53.1,
+    "zone_l": 31.2,
+    "zone_r": 43.8,
+    "kept": false,
+    "stale": false
+   },
+   "jobs": {
+    "value": 6.4,
+    "asof": "2026-08",
+    "asof_label": "Aug 2026",
+    "state": "warm",
+    "usual_lo": 6.47,
+    "usual_hi": 8.2,
+    "pos": 83.4,
+    "zone_l": 42.0,
+    "zone_r": 81.7,
+    "kept": false,
+    "stale": false
+   },
+   "growth": {
+    "value": 1.1,
+    "asof": "2026-Q2",
+    "asof_label": "Q2 2026",
+    "state": "normal",
+    "usual_lo": 0.8,
+    "usual_hi": 2.32,
+    "pos": 51.9,
+    "zone_l": 49.6,
+    "zone_r": 61.3,
+    "kept": false,
+    "stale": false
+   },
+   "rate": {
+    "value": 2.5,
+    "asof": "2026-09",
+    "asof_label": "Sep 2026",
+    "last_change": {
+     "asof": "2026-09",
+     "asof_label": "Sep 2026",
+     "delta": 0.25
+    },
+    "since_label": "Jan 2021",
+    "kept": false
+   },
+   "score": 0.67,
+   "verdict": "warm"
+  },
+  {
+   "code": "GB",
+   "name": "United Kingdom",
+   "short": "UK",
+   "bank": "Bank of England",
+   "prices": {
+    "value": 3.09,
+    "asof": "2026-08",
+    "asof_label": "Aug 2026",
+    "state": "warm",
+    "target": "2%",
+    "usual_lo": 1.5,
+    "usual_hi": 2.5,
+    "pos": 51.1,
+    "zone_l": 31.2,
+    "zone_r": 43.8,
+    "kept": false,
+    "stale": false
+   },
+   "jobs": {
+    "value": 4.9,
+    "asof": "2026-06",
+    "asof_label": "Jun 2026",
+    "state": "cool",
+    "usual_lo": 4.0,
+    "usual_hi": 4.7,
+    "pos": 25.5,
+    "zone_l": 36.5,
+    "zone_r": 74.8,
+    "kept": false,
+    "stale": false
+   },
+   "growth": {
+    "value": 1.37,
+    "asof": "2026-Q2",
+    "asof_label": "Q2 2026",
+    "state": "normal",
+    "usual_lo": 0.78,
+    "usual_hi": 2.69,
+    "pos": 52.9,
+    "zone_l": 50.4,
+    "zone_r": 58.3,
+    "kept": false,
+    "stale": false
+   },
+   "rate": {
+    "value": 3.75,
+    "asof": "2026-09",
+    "asof_label": "Sep 2026",
+    "last_change": {
+     "asof": "2025-12",
+     "asof_label": "Dec 2025",
+     "delta": -0.25
+    },
+    "since_label": "Jan 2021",
+    "kept": false
+   },
+   "score": 0.0,
+   "verdict": "normal"
+  },
+  {
+   "code": "JP",
+   "name": "Japan",
+   "short": "Japan",
+   "bank": "Bank of Japan",
+   "prices": {
+    "value": 1.9,
+    "asof": "2026-07",
+    "asof_label": "Jul 2026",
+    "state": "normal",
+    "target": "2%",
+    "usual_lo": 1.5,
+    "usual_hi": 2.5,
+    "pos": 36.2,
+    "zone_l": 31.2,
+    "zone_r": 43.8,
+    "kept": false,
+    "stale": false
+   },
+   "jobs": {
+    "value": 2.5,
+    "asof": "2026-08",
+    "asof_label": "Aug 2026",
+    "state": "normal",
+    "usual_lo": 2.4,
+    "usual_hi": 2.8,
+    "pos": 65.3,
+    "zone_l": 34.7,
+    "zone_r": 75.5,
+    "kept": false,
+    "stale": false
+   },
+   "growth": {
+    "value": 0.73,
+    "asof": "2026-Q2",
+    "asof_label": "Q2 2026",
+    "state": "normal",
+    "usual_lo": 0.15,
+    "usual_hi": 1.47,
+    "pos": 57.3,
+    "zone_l": 49.5,
+    "zone_r": 67.4,
+    "kept": false,
+    "stale": false
+   },
+   "rate": {
+    "value": 1.25,
+    "asof": "2026-09",
+    "asof_label": "Sep 2026",
+    "last_change": {
+     "asof": "2026-09",
+     "asof_label": "Sep 2026",
+     "delta": 0.25
+    },
+    "since_label": "Jan 2021",
+    "kept": false
+   },
+   "score": 0.0,
+   "verdict": "normal"
+  },
+  {
+   "code": "CH",
+   "name": "Switzerland",
+   "short": "Switzerland",
+   "bank": "Swiss National Bank",
+   "prices": {
+    "value": 0.81,
+    "asof": "2026-08",
+    "asof_label": "Aug 2026",
+    "state": "normal",
+    "target": "0 to 2%",
+    "usual_lo": 0.0,
+    "usual_hi": 2.0,
+    "pos": 22.6,
+    "zone_l": 12.5,
+    "zone_r": 37.5,
+    "kept": false,
+    "stale": false
+   },
+   "jobs": {
+    "value": 5.03,
+    "asof": "2026-Q2",
+    "asof_label": "Q2 2026",
+    "state": "cool",
+    "usual_lo": 4.25,
+    "usual_hi": 4.92,
+    "pos": 25.6,
+    "zone_l": 32.3,
+    "zone_r": 71.0,
+    "kept": false,
+    "stale": false
+   },
+   "growth": {
+    "value": 2.63,
+    "asof": "2026-Q2",
+    "asof_label": "Q2 2026",
+    "state": "normal",
+    "usual_lo": 0.87,
+    "usual_hi": 2.66,
+    "pos": 48.3,
+    "zone_l": 31.2,
+    "zone_r": 48.5,
+    "kept": false,
+    "stale": false
+   },
+   "rate": {
+    "value": 0.0,
+    "asof": "2026-09",
+    "asof_label": "Sep 2026",
+    "last_change": {
+     "asof": "2025-06",
+     "asof_label": "Jun 2025",
+     "delta": -0.25
+    },
+    "since_label": "Jan 2021",
+    "kept": false
+   },
+   "score": -0.33,
+   "verdict": "normal"
+  },
+  {
+   "code": "CA",
+   "name": "Canada",
+   "short": "Canada",
+   "bank": "Bank of Canada",
+   "prices": {
+    "value": 3.03,
+    "asof": "2026-08",
+    "asof_label": "Aug 2026",
+    "state": "normal",
+    "target": "1 to 3%",
+    "usual_lo": 1.0,
+    "usual_hi": 3.0,
+    "pos": 50.4,
+    "zone_l": 25.0,
+    "zone_r": 50.0,
+    "kept": false,
+    "stale": false
+   },
+   "jobs": {
+    "value": 6.4,
+    "asof": "2026-08",
+    "asof_label": "Aug 2026",
+    "state": "normal",
+    "usual_lo": 5.7,
+    "usual_hi": 6.9,
+    "pos": 62.5,
+    "zone_l": 53.6,
+    "zone_r": 75.0,
+    "kept": false,
+    "stale": false
+   },
+   "growth": {
+    "value": 1.13,
+    "asof": "2026-Q2",
+    "asof_label": "Q2 2026",
+    "state": "cool",
+    "usual_lo": 1.29,
+    "usual_hi": 3.08,
+    "pos": 49.0,
+    "zone_l": 50.3,
+    "zone_r": 65.0,
+    "kept": false,
+    "stale": false
+   },
+   "rate": {
+    "value": 2.25,
+    "asof": "2026-09",
+    "asof_label": "Sep 2026",
+    "last_change": {
+     "asof": "2025-10",
+     "asof_label": "Oct 2025",
+     "delta": -0.25
+    },
+    "since_label": "Jan 2021",
+    "kept": false
+   },
+   "score": -0.33,
+   "verdict": "normal"
+  },
+  {
+   "code": "AU",
+   "name": "Australia",
+   "short": "Australia",
+   "bank": "Reserve Bank of Australia",
+   "prices": {
+    "value": 3.94,
+    "asof": "2026-06",
+    "asof_label": "Jun 2026",
+    "state": "warm",
+    "target": "2 to 3%",
+    "usual_lo": 2.0,
+    "usual_hi": 3.0,
+    "pos": 61.8,
+    "zone_l": 37.5,
+    "zone_r": 50.0,
+    "kept": false,
+    "stale": false
+   },
+   "jobs": {
+    "value": 4.65,
+    "asof": "2026-08",
+    "asof_label": "Aug 2026",
+    "state": "normal",
+    "usual_lo": 4.06,
+    "usual_hi": 5.47,
+    "pos": 61.6,
+    "zone_l": 43.5,
+    "zone_r": 74.5,
+    "kept": false,
+    "stale": false
+   },
+   "growth": {
+    "value": 2.14,
+    "asof": "2026-Q2",
+    "asof_label": "Q2 2026",
+    "state": "normal",
+    "usual_lo": 1.59,
+    "usual_hi": 2.86,
+    "pos": 49.1,
+    "zone_l": 42.1,
+    "zone_r": 58.4,
+    "kept": false,
+    "stale": false
+   },
+   "rate": {
+    "value": 4.6,
+    "asof": "2026-09",
+    "asof_label": "Sep 2026",
+    "last_change": {
+     "asof": "2026-09",
+     "asof_label": "Sep 2026",
+     "delta": 0.25
+    },
+    "since_label": "Jan 2021",
+    "kept": false
+   },
+   "score": 0.33,
+   "verdict": "normal"
+  },
+  {
+   "code": "NZ",
+   "name": "New Zealand",
+   "short": "N. Zealand",
+   "bank": "Reserve Bank of New Zealand",
+   "prices": {
+    "value": 4.06,
+    "asof": "2026-06",
+    "asof_label": "Jun 2026",
+    "state": "hot",
+    "target": "1 to 3%",
+    "usual_lo": 1.0,
+    "usual_hi": 3.0,
+    "pos": 63.2,
+    "zone_l": 25.0,
+    "zone_r": 50.0,
+    "kept": false,
+    "stale": false
+   },
+   "jobs": {
+    "value": 5.6,
+    "asof": "2026-Q2",
+    "asof_label": "Q2 2026",
+    "state": "cold",
+    "usual_lo": 4.0,
+    "usual_hi": 4.93,
+    "pos": 7.5,
+    "zone_l": 30.4,
+    "zone_r": 61.9,
+    "kept": false,
+    "stale": false
+   },
+   "growth": {
+    "value": 3.01,
+    "asof": "2026-Q2",
+    "asof_label": "Q2 2026",
+    "state": "normal",
+    "usual_lo": 0.84,
+    "usual_hi": 3.75,
+    "pos": 59.5,
+    "zone_l": 36.1,
+    "zone_r": 67.5,
+    "kept": false,
+    "stale": false
+   },
+   "rate": {
+    "value": 2.75,
+    "asof": "2026-09",
+    "asof_label": "Sep 2026",
+    "last_change": {
+     "asof": "2026-09",
+     "asof_label": "Sep 2026",
+     "delta": 0.25
+    },
+    "since_label": "Jan 2021",
+    "kept": false
+   },
+   "score": 0.0,
+   "verdict": "normal"
+  },
+  {
+   "code": "NO",
+   "name": "Norway",
+   "short": "Norway",
+   "bank": "Norges Bank",
+   "prices": {
+    "value": 3.29,
+    "asof": "2026-08",
+    "asof_label": "Aug 2026",
+    "state": "warm",
+    "target": "2%",
+    "usual_lo": 1.5,
+    "usual_hi": 2.5,
+    "pos": 53.7,
+    "zone_l": 31.2,
+    "zone_r": 43.8,
+    "kept": false,
+    "stale": false
+   },
+   "jobs": {
+    "value": 4.5,
+    "asof": "2026-08",
+    "asof_label": "Aug 2026",
+    "state": "normal",
+    "usual_lo": 3.7,
+    "usual_hi": 4.5,
+    "pos": 39.3,
+    "zone_l": 39.3,
+    "zone_r": 67.8,
+    "kept": false,
+    "stale": false
+   },
+   "growth": {
+    "value": 1.6,
+    "asof": "2026-Q2",
+    "asof_label": "Q2 2026",
+    "state": "normal",
+    "usual_lo": 0.56,
+    "usual_hi": 2.65,
+    "pos": 49.8,
+    "zone_l": 39.5,
+    "zone_r": 60.1,
+    "kept": false,
+    "stale": false
+   },
+   "rate": {
+    "value": 4.5,
+    "asof": "2026-09",
+    "asof_label": "Sep 2026",
+    "last_change": {
+     "asof": "2026-09",
+     "asof_label": "Sep 2026",
+     "delta": 0.25
+    },
+    "since_label": "Jan 2021",
+    "kept": false
+   },
+   "score": 0.33,
+   "verdict": "normal"
+  },
+  {
+   "code": "SE",
+   "name": "Sweden",
+   "short": "Sweden",
+   "bank": "Riksbank",
+   "prices": {
+    "value": 0.31,
+    "asof": "2026-08",
+    "asof_label": "Aug 2026",
+    "state": "cold",
+    "target": "2%",
+    "usual_lo": 1.5,
+    "usual_hi": 2.5,
+    "pos": 16.3,
+    "zone_l": 31.2,
+    "zone_r": 43.8,
+    "kept": false,
+    "stale": false
+   },
+   "jobs": {
+    "value": 8.9,
+    "asof": "2026-08",
+    "asof_label": "Aug 2026",
+    "state": "cool",
+    "usual_lo": 6.9,
+    "usual_hi": 8.6,
+    "pos": 24.5,
+    "zone_l": 32.1,
+    "zone_r": 75.5,
+    "kept": false,
+    "stale": false
+   },
+   "growth": {
+    "value": 3.21,
+    "asof": "2026-Q2",
+    "asof_label": "Q2 2026",
+    "state": "warm",
+    "usual_lo": 0.79,
+    "usual_hi": 2.48,
+    "pos": 72.9,
+    "zone_l": 44.0,
+    "zone_r": 64.2,
+    "kept": false,
+    "stale": false
+   },
+   "rate": {
+    "value": 1.75,
+    "asof": "2026-09",
+    "asof_label": "Sep 2026",
+    "last_change": {
+     "asof": "2025-10",
+     "asof_label": "Oct 2025",
+     "delta": -0.25
+    },
+    "since_label": "Jan 2021",
+    "kept": false
+   },
+   "score": -0.67,
+   "verdict": "cool"
+  }
+ ]
+}
