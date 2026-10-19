@@ -1,6 +1,7 @@
 {
- "generated": "2026-10-19T14:04:05Z",
+ "generated": "2026-10-19T14:19:48Z",
  "demo": false,
+ "schema": 2,
  "history_years": 10,
  "countries": [
   {
@@ -8,14 +9,15 @@
    "name": "United States",
    "short": "US",
    "bank": "Federal Reserve",
+   "bank_short": "Fed",
    "prices": {
     "value": 3.4,
     "asof": "2026-08",
     "asof_label": "Aug 2026",
     "state": "warm",
     "target": "2%",
-    "usual_lo": 1.5,
-    "usual_hi": 2.5,
+    "range_lo": 1.5,
+    "range_hi": 2.5,
     "pos": 55.0,
     "zone_l": 31.2,
     "zone_r": 43.8,
@@ -27,8 +29,8 @@
     "asof": "2026-09",
     "asof_label": "Sep 2026",
     "state": "normal",
-    "usual_lo": 3.7,
-    "usual_hi": 4.4,
+    "range_lo": 3.7,
+    "range_hi": 4.4,
     "pos": 71.2,
     "zone_l": 67.1,
     "zone_r": 81.6,
@@ -36,26 +38,26 @@
     "stale": false
    },
    "growth": {
-    "value": 2.19,
+    "value": 0.55,
     "asof": "2026-Q2",
     "asof_label": "Q2 2026",
     "state": "normal",
-    "usual_lo": 2.12,
-    "usual_hi": 3.14,
-    "pos": 50.2,
-    "zone_l": 49.3,
-    "zone_r": 61.1,
+    "range_lo": 0.54,
+    "range_hi": 0.91,
+    "pos": 45.3,
+    "zone_l": 44.8,
+    "zone_r": 58.4,
     "kept": false,
     "stale": false
    },
    "rate": {
-    "value": 3.875,
+    "value": 4.0,
     "asof": "2026-09",
     "asof_label": "Sep 2026",
     "last_change": {
      "asof": "2026-09",
      "asof_label": "Sep 2026",
-     "delta": 0.25
+     "bp": 25
     },
     "since_label": "Jan 2021",
     "kept": false
@@ -68,14 +70,15 @@
    "name": "Eurozone",
    "short": "Eurozone",
    "bank": "European Central Bank",
+   "bank_short": "ECB",
    "prices": {
     "value": 3.25,
     "asof": "2026-08",
     "asof_label": "Aug 2026",
     "state": "warm",
     "target": "2%",
-    "usual_lo": 1.5,
-    "usual_hi": 2.5,
+    "range_lo": 1.5,
+    "range_hi": 2.5,
     "pos": 53.1,
     "zone_l": 31.2,
     "zone_r": 43.8,
@@ -87,8 +90,8 @@
     "asof": "2026-08",
     "asof_label": "Aug 2026",
     "state": "warm",
-    "usual_lo": 6.47,
-    "usual_hi": 8.2,
+    "range_lo": 6.47,
+    "range_hi": 8.2,
     "pos": 83.4,
     "zone_l": 42.0,
     "zone_r": 81.7,
@@ -96,15 +99,15 @@
     "stale": false
    },
    "growth": {
-    "value": 1.1,
+    "value": 0.6,
     "asof": "2026-Q2",
     "asof_label": "Q2 2026",
     "state": "normal",
-    "usual_lo": 0.8,
-    "usual_hi": 2.32,
-    "pos": 51.9,
-    "zone_l": 49.6,
-    "zone_r": 61.3,
+    "range_lo": 0.2,
+    "range_hi": 0.72,
+    "pos": 45.6,
+    "zone_l": 32.4,
+    "zone_r": 49.8,
     "kept": false,
     "stale": false
    },
@@ -115,7 +118,7 @@
     "last_change": {
      "asof": "2026-09",
      "asof_label": "Sep 2026",
-     "delta": 0.25
+     "bp": 25
     },
     "since_label": "Jan 2021",
     "kept": false
@@ -128,14 +131,15 @@
    "name": "United Kingdom",
    "short": "UK",
    "bank": "Bank of England",
+   "bank_short": "BoE",
    "prices": {
     "value": 3.09,
     "asof": "2026-08",
     "asof_label": "Aug 2026",
     "state": "warm",
     "target": "2%",
-    "usual_lo": 1.5,
-    "usual_hi": 2.5,
+    "range_lo": 1.5,
+    "range_hi": 2.5,
     "pos": 51.1,
     "zone_l": 31.2,
     "zone_r": 43.8,
@@ -147,8 +151,8 @@
     "asof": "2026-06",
     "asof_label": "Jun 2026",
     "state": "cool",
-    "usual_lo": 4.0,
-    "usual_hi": 4.7,
+    "range_lo": 4.0,
+    "range_hi": 4.7,
     "pos": 25.5,
     "zone_l": 36.5,
     "zone_r": 74.8,
@@ -156,15 +160,15 @@
     "stale": false
    },
    "growth": {
-    "value": 1.37,
+    "value": 0.53,
     "asof": "2026-Q2",
     "asof_label": "Q2 2026",
     "state": "normal",
-    "usual_lo": 0.78,
-    "usual_hi": 2.69,
-    "pos": 52.9,
-    "zone_l": 50.4,
-    "zone_r": 58.3,
+    "range_lo": 0.13,
+    "range_hi": 0.73,
+    "pos": 52.8,
+    "zone_l": 43.6,
+    "zone_r": 57.4,
     "kept": false,
     "stale": false
    },
@@ -175,7 +179,7 @@
     "last_change": {
      "asof": "2025-12",
      "asof_label": "Dec 2025",
-     "delta": -0.25
+     "bp": -25
     },
     "since_label": "Jan 2021",
     "kept": false
@@ -188,14 +192,15 @@
    "name": "Japan",
    "short": "Japan",
    "bank": "Bank of Japan",
+   "bank_short": "BoJ",
    "prices": {
     "value": 1.9,
     "asof": "2026-07",
     "asof_label": "Jul 2026",
     "state": "normal",
     "target": "2%",
-    "usual_lo": 1.5,
-    "usual_hi": 2.5,
+    "range_lo": 1.5,
+    "range_hi": 2.5,
     "pos": 36.2,
     "zone_l": 31.2,
     "zone_r": 43.8,
@@ -207,8 +212,8 @@
     "asof": "2026-08",
     "asof_label": "Aug 2026",
     "state": "normal",
-    "usual_lo": 2.4,
-    "usual_hi": 2.8,
+    "range_lo": 2.4,
+    "range_hi": 2.8,
     "pos": 65.3,
     "zone_l": 34.7,
     "zone_r": 75.5,
@@ -216,15 +221,15 @@
     "stale": false
    },
    "growth": {
-    "value": 0.73,
+    "value": 0.36,
     "asof": "2026-Q2",
     "asof_label": "Q2 2026",
     "state": "normal",
-    "usual_lo": 0.15,
-    "usual_hi": 1.47,
-    "pos": 57.3,
-    "zone_l": 49.5,
-    "zone_r": 67.4,
+    "range_lo": -0.1,
+    "range_hi": 0.61,
+    "pos": 61.8,
+    "zone_l": 48.9,
+    "zone_r": 68.9,
     "kept": false,
     "stale": false
    },
@@ -235,7 +240,7 @@
     "last_change": {
      "asof": "2026-09",
      "asof_label": "Sep 2026",
-     "delta": 0.25
+     "bp": 25
     },
     "since_label": "Jan 2021",
     "kept": false
@@ -248,14 +253,15 @@
    "name": "Switzerland",
    "short": "Switzerland",
    "bank": "Swiss National Bank",
+   "bank_short": "SNB",
    "prices": {
     "value": 0.81,
     "asof": "2026-08",
     "asof_label": "Aug 2026",
     "state": "normal",
     "target": "0 to 2%",
-    "usual_lo": 0.0,
-    "usual_hi": 2.0,
+    "range_lo": 0.0,
+    "range_hi": 2.0,
     "pos": 22.6,
     "zone_l": 12.5,
     "zone_r": 37.5,
@@ -267,8 +273,8 @@
     "asof": "2026-Q2",
     "asof_label": "Q2 2026",
     "state": "cool",
-    "usual_lo": 4.25,
-    "usual_hi": 4.92,
+    "range_lo": 4.25,
+    "range_hi": 4.92,
     "pos": 25.6,
     "zone_l": 32.3,
     "zone_r": 71.0,
@@ -276,15 +282,15 @@
     "stale": false
    },
    "growth": {
-    "value": 2.63,
+    "value": 1.88,
     "asof": "2026-Q2",
     "asof_label": "Q2 2026",
-    "state": "normal",
-    "usual_lo": 0.87,
-    "usual_hi": 2.66,
-    "pos": 48.3,
-    "zone_l": 31.2,
-    "zone_r": 48.5,
+    "state": "hot",
+    "range_lo": 0.16,
+    "range_hi": 0.85,
+    "pos": 77.4,
+    "zone_l": 30.7,
+    "zone_r": 49.5,
     "kept": false,
     "stale": false
    },
@@ -295,12 +301,12 @@
     "last_change": {
      "asof": "2025-06",
      "asof_label": "Jun 2025",
-     "delta": -0.25
+     "bp": -25
     },
     "since_label": "Jan 2021",
     "kept": false
    },
-   "score": -0.33,
+   "score": 0.33,
    "verdict": "normal"
   },
   {
@@ -308,14 +314,15 @@
    "name": "Canada",
    "short": "Canada",
    "bank": "Bank of Canada",
+   "bank_short": "BoC",
    "prices": {
     "value": 3.03,
     "asof": "2026-08",
     "asof_label": "Aug 2026",
     "state": "normal",
     "target": "1 to 3%",
-    "usual_lo": 1.0,
-    "usual_hi": 3.0,
+    "range_lo": 1.0,
+    "range_hi": 3.0,
     "pos": 50.4,
     "zone_l": 25.0,
     "zone_r": 50.0,
@@ -327,8 +334,8 @@
     "asof": "2026-08",
     "asof_label": "Aug 2026",
     "state": "normal",
-    "usual_lo": 5.7,
-    "usual_hi": 6.9,
+    "range_lo": 5.7,
+    "range_hi": 6.9,
     "pos": 62.5,
     "zone_l": 53.6,
     "zone_r": 75.0,
@@ -336,15 +343,15 @@
     "stale": false
    },
    "growth": {
-    "value": 1.13,
+    "value": 0.82,
     "asof": "2026-Q2",
     "asof_label": "Q2 2026",
-    "state": "cool",
-    "usual_lo": 1.29,
-    "usual_hi": 3.08,
-    "pos": 49.0,
-    "zone_l": 50.3,
-    "zone_r": 65.0,
+    "state": "normal",
+    "range_lo": 0.14,
+    "range_hi": 1.05,
+    "pos": 51.4,
+    "zone_l": 29.5,
+    "zone_r": 58.9,
     "kept": false,
     "stale": false
    },
@@ -355,12 +362,12 @@
     "last_change": {
      "asof": "2025-10",
      "asof_label": "Oct 2025",
-     "delta": -0.25
+     "bp": -25
     },
     "since_label": "Jan 2021",
     "kept": false
    },
-   "score": -0.33,
+   "score": 0.0,
    "verdict": "normal"
   },
   {
@@ -368,14 +375,15 @@
    "name": "Australia",
    "short": "Australia",
    "bank": "Reserve Bank of Australia",
+   "bank_short": "RBA",
    "prices": {
     "value": 3.94,
     "asof": "2026-06",
     "asof_label": "Jun 2026",
     "state": "warm",
     "target": "2 to 3%",
-    "usual_lo": 2.0,
-    "usual_hi": 3.0,
+    "range_lo": 2.0,
+    "range_hi": 3.0,
     "pos": 61.8,
     "zone_l": 37.5,
     "zone_r": 50.0,
@@ -387,8 +395,8 @@
     "asof": "2026-08",
     "asof_label": "Aug 2026",
     "state": "normal",
-    "usual_lo": 4.06,
-    "usual_hi": 5.47,
+    "range_lo": 4.06,
+    "range_hi": 5.47,
     "pos": 61.6,
     "zone_l": 43.5,
     "zone_r": 74.5,
@@ -396,15 +404,15 @@
     "stale": false
    },
    "growth": {
-    "value": 2.14,
+    "value": 0.42,
     "asof": "2026-Q2",
     "asof_label": "Q2 2026",
     "state": "normal",
-    "usual_lo": 1.59,
-    "usual_hi": 2.86,
-    "pos": 49.1,
-    "zone_l": 42.1,
-    "zone_r": 58.4,
+    "range_lo": 0.32,
+    "range_hi": 0.87,
+    "pos": 27.1,
+    "zone_l": 25.2,
+    "zone_r": 35.8,
     "kept": false,
     "stale": false
    },
@@ -415,7 +423,7 @@
     "last_change": {
      "asof": "2026-09",
      "asof_label": "Sep 2026",
-     "delta": 0.25
+     "bp": 25
     },
     "since_label": "Jan 2021",
     "kept": false
@@ -428,14 +436,15 @@
    "name": "New Zealand",
    "short": "N. Zealand",
    "bank": "Reserve Bank of New Zealand",
+   "bank_short": "RBNZ",
    "prices": {
     "value": 4.06,
     "asof": "2026-06",
     "asof_label": "Jun 2026",
     "state": "hot",
     "target": "1 to 3%",
-    "usual_lo": 1.0,
-    "usual_hi": 3.0,
+    "range_lo": 1.0,
+    "range_hi": 3.0,
     "pos": 63.2,
     "zone_l": 25.0,
     "zone_r": 50.0,
@@ -447,8 +456,8 @@
     "asof": "2026-Q2",
     "asof_label": "Q2 2026",
     "state": "cold",
-    "usual_lo": 4.0,
-    "usual_hi": 4.93,
+    "range_lo": 4.0,
+    "range_hi": 4.93,
     "pos": 7.5,
     "zone_l": 30.4,
     "zone_r": 61.9,
@@ -456,15 +465,15 @@
     "stale": false
    },
    "growth": {
-    "value": 3.01,
+    "value": 0.36,
     "asof": "2026-Q2",
     "asof_label": "Q2 2026",
     "state": "normal",
-    "usual_lo": 0.84,
-    "usual_hi": 3.75,
-    "pos": 59.5,
-    "zone_l": 36.1,
-    "zone_r": 67.5,
+    "range_lo": 0.02,
+    "range_hi": 1.18,
+    "pos": 46.2,
+    "zone_l": 40.0,
+    "zone_r": 61.4,
     "kept": false,
     "stale": false
    },
@@ -475,7 +484,7 @@
     "last_change": {
      "asof": "2026-09",
      "asof_label": "Sep 2026",
-     "delta": 0.25
+     "bp": 25
     },
     "since_label": "Jan 2021",
     "kept": false
@@ -488,14 +497,15 @@
    "name": "Norway",
    "short": "Norway",
    "bank": "Norges Bank",
+   "bank_short": "Norges Bank",
    "prices": {
     "value": 3.29,
     "asof": "2026-08",
     "asof_label": "Aug 2026",
     "state": "warm",
     "target": "2%",
-    "usual_lo": 1.5,
-    "usual_hi": 2.5,
+    "range_lo": 1.5,
+    "range_hi": 2.5,
     "pos": 53.7,
     "zone_l": 31.2,
     "zone_r": 43.8,
@@ -507,8 +517,8 @@
     "asof": "2026-08",
     "asof_label": "Aug 2026",
     "state": "normal",
-    "usual_lo": 3.7,
-    "usual_hi": 4.5,
+    "range_lo": 3.7,
+    "range_hi": 4.5,
     "pos": 39.3,
     "zone_l": 39.3,
     "zone_r": 67.8,
@@ -516,15 +526,15 @@
     "stale": false
    },
    "growth": {
-    "value": 1.6,
+    "value": 0.67,
     "asof": "2026-Q2",
     "asof_label": "Q2 2026",
     "state": "normal",
-    "usual_lo": 0.56,
-    "usual_hi": 2.65,
-    "pos": 49.8,
-    "zone_l": 39.5,
-    "zone_r": 60.1,
+    "range_lo": -0.59,
+    "range_hi": 1.13,
+    "pos": 49.6,
+    "zone_l": 26.5,
+    "zone_r": 58.0,
     "kept": false,
     "stale": false
    },
@@ -535,7 +545,7 @@
     "last_change": {
      "asof": "2026-09",
      "asof_label": "Sep 2026",
-     "delta": 0.25
+     "bp": 25
     },
     "since_label": "Jan 2021",
     "kept": false
@@ -548,14 +558,15 @@
    "name": "Sweden",
    "short": "Sweden",
    "bank": "Riksbank",
+   "bank_short": "Riksbank",
    "prices": {
     "value": 0.31,
     "asof": "2026-08",
     "asof_label": "Aug 2026",
     "state": "cold",
     "target": "2%",
-    "usual_lo": 1.5,
-    "usual_hi": 2.5,
+    "range_lo": 1.5,
+    "range_hi": 2.5,
     "pos": 16.3,
     "zone_l": 31.2,
     "zone_r": 43.8,
@@ -567,8 +578,8 @@
     "asof": "2026-08",
     "asof_label": "Aug 2026",
     "state": "cool",
-    "usual_lo": 6.9,
-    "usual_hi": 8.6,
+    "range_lo": 6.9,
+    "range_hi": 8.6,
     "pos": 24.5,
     "zone_l": 32.1,
     "zone_r": 75.5,
@@ -576,15 +587,15 @@
     "stale": false
    },
    "growth": {
-    "value": 3.21,
+    "value": 1.56,
     "asof": "2026-Q2",
     "asof_label": "Q2 2026",
     "state": "warm",
-    "usual_lo": 0.79,
-    "usual_hi": 2.48,
-    "pos": 72.9,
-    "zone_l": 44.0,
-    "zone_r": 64.2,
+    "range_lo": -0.2,
+    "range_hi": 1.27,
+    "pos": 66.7,
+    "zone_l": 36.2,
+    "zone_r": 61.7,
     "kept": false,
     "stale": false
    },
@@ -595,7 +606,7 @@
     "last_change": {
      "asof": "2025-10",
      "asof_label": "Oct 2025",
-     "delta": -0.25
+     "bp": -25
     },
     "since_label": "Jan 2021",
     "kept": false
