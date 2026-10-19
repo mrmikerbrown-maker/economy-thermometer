@@ -26,7 +26,7 @@ ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 CFG = json.load(open(os.path.join(ROOT, "config.json"), encoding="utf-8"))
 OUT = os.path.join(ROOT, "data.json")
 UA = "Mozilla/5.0 (compatible; economy-thermometer/1.0)"
-SCHEMA = 2  # bump when the meaning of a stored figure changes, so old values are never reused
+SCHEMA = 3  # bump when the meaning of a stored figure changes, so old values are never reused
 DEMO = "--demo" in sys.argv
 TODAY = dt.date.today()
 HIST_YEARS = CFG.get("history_years", 10)
@@ -164,6 +164,27 @@ def level_to_qoq(level):
     return out
 
 
+def q_add(key, n):
+    t = int(key[:4]) * 4 + (int(key[-1]) - 1) + n
+    return qkey(t // 4, t % 4 + 1)
+
+
+def trail_of(series, freq, back):
+    """Earlier readings, oldest first, for the faint dots: the `back` periods before the latest one."""
+    d = dict(series)
+    key = series[-1][0]
+    step = month_add if freq == "M" else q_add
+    out = [(step(key, -i), d[step(key, -i)]) for i in range(back, 0, -1) if step(key, -i) in d]
+    ago = None
+    if out and out[0][0] == step(key, -back):
+        ago = {"label": label(out[0][0]), "value": round(out[0][1], 2) + 0.0}
+    return out, ago
+
+
+def trail_json(trail, ago, pos):
+    return {"trail": [{"k": label(k), "v": round(x, 2), "pos": round(pos(x), 1)} for k, x in trail], "ago": ago}
+
+
 def pct(sorted_vals, p):
     if not sorted_vals:
         raise ValueError("empty")
@@ -196,11 +217,12 @@ def spread_guard(q25, q75, med, floor):
     return q25, q75
 
 
-def activity_axis(vals, v, qs):
+def activity_axis(vals, v, extra=()):
     """Axis for the strip: ignore extreme one-offs (e.g. 2020) so the typical range stays readable."""
     p5, p95 = pct(vals, 0.05), pct(vals, 0.95)
     pad = (p95 - p5) * 0.2 or 1.0
-    return min(p5 - pad, v - pad * 0.3), max(p95 + pad, v + pad * 0.3)
+    every = [v] + list(extra)
+    return min(p5 - pad, min(every) - pad * 0.3), max(p95 + pad, max(every) + pad * 0.3)
 
 
 def jobs_block(series, freq):
@@ -219,11 +241,13 @@ def jobs_block(series, freq):
         st = "cool"
     else:
         st = "cold"
-    lo, hi = activity_axis(vals, v, None)
+    tr, ago = trail_of(series, freq, 12 if freq == "M" else 4)
+    lo, hi = activity_axis(vals, v, [x for _, x in tr])
     pos = lambda x: (hi - x) / (hi - lo) * 100
-    return {"value": round(v, 2), "asof": key, "asof_label": label(key), "state": st,
-            "range_lo": round(q25, 2), "range_hi": round(q75, 2),
-            "pos": round(pos(v), 1), "zone_l": round(pos(q75), 1), "zone_r": round(pos(q25), 1)}
+    return dict({"value": round(v, 2), "asof": key, "asof_label": label(key), "state": st,
+                 "range_lo": round(q25, 2), "range_hi": round(q75, 2),
+                 "pos": round(pos(v), 1), "zone_l": round(pos(q75), 1), "zone_r": round(pos(q25), 1)},
+                **trail_json(tr, ago, pos))
 
 
 def growth_block(series, freq):
@@ -241,21 +265,26 @@ def growth_block(series, freq):
         st = "cool"
     else:
         st = "cold"
-    lo, hi = activity_axis(vals, v, None)
+    tr, ago = trail_of(series, "Q", 4)
+    lo, hi = activity_axis(vals, v, [x for _, x in tr])
     pos = lambda x: (x - lo) / (hi - lo) * 100
-    return {"value": round(v, 2), "asof": key, "asof_label": label(key), "state": st,
-            "range_lo": round(q25, 2), "range_hi": round(q75, 2),
-            "pos": round(pos(v), 1), "zone_l": round(pos(q25), 1), "zone_r": round(pos(q75), 1)}
+    return dict({"value": round(v, 2), "asof": key, "asof_label": label(key), "state": st,
+                 "range_lo": round(q25, 2), "range_hi": round(q75, 2),
+                 "pos": round(pos(v), 1), "zone_l": round(pos(q25), 1), "zone_r": round(pos(q75), 1)},
+                **trail_json(tr, ago, pos))
 
 
 def prices_block(series, tgt):
     key, v = series[-1]
     st = prices_state(v, tgt["lo"], tgt["hi"])
-    lo, hi = min(-1.0, math.floor(v - 0.5)), max(7.0, math.ceil(v + 0.5))
+    tr, ago = trail_of(series, "M", 12)
+    every = [v] + [x for _, x in tr]
+    lo, hi = min(-1.0, math.floor(min(every) - 0.5)), max(7.0, math.ceil(max(every) + 0.5))
     pos = lambda x: (x - lo) / (hi - lo) * 100
-    return {"value": round(v, 2), "asof": key, "asof_label": label(key), "state": st,
-            "target": tgt["label"], "range_lo": tgt["lo"], "range_hi": tgt["hi"],
-            "pos": round(pos(v), 1), "zone_l": round(pos(tgt["lo"]), 1), "zone_r": round(pos(tgt["hi"]), 1)}
+    return dict({"value": round(v, 2), "asof": key, "asof_label": label(key), "state": st,
+                 "target": tgt["label"], "range_lo": tgt["lo"], "range_hi": tgt["hi"],
+                 "pos": round(pos(v), 1), "zone_l": round(pos(tgt["lo"]), 1), "zone_r": round(pos(tgt["hi"]), 1)},
+                **trail_json(tr, ago, pos))
 
 
 def rate_block(series, adjust=0.0):
