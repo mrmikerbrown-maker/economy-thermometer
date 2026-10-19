@@ -26,6 +26,7 @@ ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 CFG = json.load(open(os.path.join(ROOT, "config.json"), encoding="utf-8"))
 OUT = os.path.join(ROOT, "data.json")
 UA = "Mozilla/5.0 (compatible; economy-thermometer/1.0)"
+SCHEMA = 2  # bump when the meaning of a stored figure changes, so old values are never reused
 DEMO = "--demo" in sys.argv
 TODAY = dt.date.today()
 HIST_YEARS = CFG.get("history_years", 10)
@@ -150,31 +151,14 @@ def cpi_yoy(index_series):
     return out
 
 
-def qoq_to_yoy(qoq):
-    """Compound four consecutive quarter-on-quarter growth rates into a year-on-year rate."""
-    d = dict(qoq)
-    out = []
-    for k in sorted(d):
-        y, q = int(k[:4]), int(k[-1])
-        ks, prod = [], 1.0
-        for i in range(4):
-            tq = y * 4 + (q - 1) - i
-            kk = qkey(tq // 4, tq % 4 + 1)
-            if kk not in d:
-                prod = None
-                break
-            prod *= 1 + d[kk] / 100
-        if prod is not None:
-            out.append((k, (prod - 1) * 100))
-    return out
-
-
-def level_to_yoy(level):
+def level_to_qoq(level):
+    """Real GDP level -> growth on the previous quarter, in percent (not annualised)."""
     d = dict(level)
     out = []
     for k in sorted(d):
         y, q = int(k[:4]), int(k[-1])
-        prev = d.get(qkey(y - 1, q))
+        pk = qkey(y, q - 1) if q > 1 else qkey(y - 1, 4)
+        prev = d.get(pk)
         if prev:
             out.append((k, (d[k] / prev - 1) * 100))
     return out
@@ -206,14 +190,14 @@ def window(series, freq):
 
 
 def spread_guard(q25, q75, med, floor):
-    """If a series barely moves, widen the 'usual' range so tiny wobbles don't flip the label."""
+    """If a series barely moves, widen the typical range so tiny wobbles don't flip the label."""
     if q75 - q25 < floor:
         return med - floor / 2, med + floor / 2
     return q25, q75
 
 
 def activity_axis(vals, v, qs):
-    """Axis for the strip: ignore extreme one-offs (e.g. 2020) so the usual range stays readable."""
+    """Axis for the strip: ignore extreme one-offs (e.g. 2020) so the typical range stays readable."""
     p5, p95 = pct(vals, 0.05), pct(vals, 0.95)
     pad = (p95 - p5) * 0.2 or 1.0
     return min(p5 - pad, v - pad * 0.3), max(p95 + pad, v + pad * 0.3)
@@ -238,7 +222,7 @@ def jobs_block(series, freq):
     lo, hi = activity_axis(vals, v, None)
     pos = lambda x: (hi - x) / (hi - lo) * 100
     return {"value": round(v, 2), "asof": key, "asof_label": label(key), "state": st,
-            "usual_lo": round(q25, 2), "usual_hi": round(q75, 2),
+            "range_lo": round(q25, 2), "range_hi": round(q75, 2),
             "pos": round(pos(v), 1), "zone_l": round(pos(q75), 1), "zone_r": round(pos(q25), 1)}
 
 
@@ -246,7 +230,7 @@ def growth_block(series, freq):
     key, v = series[-1]
     vals = sorted(window(series, freq))
     q10, q25, med, q75, q90 = [pct(vals, p) for p in (0.10, 0.25, 0.5, 0.75, 0.90)]
-    q25, q75 = spread_guard(q25, q75, med, 0.4)
+    q25, q75 = spread_guard(q25, q75, med, 0.15)
     if v >= q90:
         st = "hot"
     elif v > q75:
@@ -260,7 +244,7 @@ def growth_block(series, freq):
     lo, hi = activity_axis(vals, v, None)
     pos = lambda x: (x - lo) / (hi - lo) * 100
     return {"value": round(v, 2), "asof": key, "asof_label": label(key), "state": st,
-            "usual_lo": round(q25, 2), "usual_hi": round(q75, 2),
+            "range_lo": round(q25, 2), "range_hi": round(q75, 2),
             "pos": round(pos(v), 1), "zone_l": round(pos(q25), 1), "zone_r": round(pos(q75), 1)}
 
 
@@ -270,17 +254,19 @@ def prices_block(series, tgt):
     lo, hi = min(-1.0, math.floor(v - 0.5)), max(7.0, math.ceil(v + 0.5))
     pos = lambda x: (x - lo) / (hi - lo) * 100
     return {"value": round(v, 2), "asof": key, "asof_label": label(key), "state": st,
-            "target": tgt["label"], "usual_lo": tgt["lo"], "usual_hi": tgt["hi"],
+            "target": tgt["label"], "range_lo": tgt["lo"], "range_hi": tgt["hi"],
             "pos": round(pos(v), 1), "zone_l": round(pos(tgt["lo"]), 1), "zone_r": round(pos(tgt["hi"]), 1)}
 
 
-def rate_block(series):
+def rate_block(series, adjust=0.0):
+    """Policy rate. `adjust` shifts every value (the US feed is the middle of the Fed's range; +0.125 gives the upper bound)."""
+    series = [(k, v + adjust) for k, v in series]
     key, v = series[-1]
     change = None
     for i in range(len(series) - 1, 0, -1):
-        d = series[i][1] - series[i - 1][1]
-        if abs(d) >= 0.01:
-            change = {"asof": series[i][0], "asof_label": label(series[i][0]), "delta": round(d, 3)}
+        bp = round((series[i][1] - series[i - 1][1]) * 100)
+        if bp != 0:
+            change = {"asof": series[i][0], "asof_label": label(series[i][0]), "bp": bp}
             break
     return {"value": round(v, 3), "asof": key, "asof_label": label(key), "last_change": change,
             "since_label": label(series[0][0])}
@@ -291,7 +277,10 @@ def rate_block(series):
 
 def load_previous():
     try:
-        return {c["code"]: c for c in json.load(open(OUT, encoding="utf-8")).get("countries", [])}
+        j = json.load(open(OUT, encoding="utf-8"))
+        if j.get("schema") != SCHEMA:
+            return {}
+        return {c["code"]: c for c in j.get("countries", [])}
     except (OSError, ValueError, KeyError):
         return {}
 
@@ -321,7 +310,7 @@ def main():
     countries = []
     for c in CFG["countries"]:
         code, old = c["code"], prev.get(c["code"], {})
-        new = {"code": code, "name": c["name"], "short": c["short"], "bank": c["bank"]}
+        new = {"code": code, "name": c["name"], "short": c["short"], "bank": c["bank"], "bank_short": c["bank_short"]}
 
         def attempt(name, fn):
             try:
@@ -364,28 +353,27 @@ def main():
         def growth():
             g = c["growth"]
             if g["src"] == "fred_level":
-                s = level_to_yoy(fred_csv(g["id"], "Q"))
+                s = level_to_qoq(fred_csv(g["id"], "Q"))
             elif g["src"] == "fred_qoq":
-                s = qoq_to_yoy(fred_csv(g["id"], "Q"))
+                s = fred_csv(g["id"], "Q")
             else:
-                q, err = None, None
+                s, err = None, None
                 for geo in g["geo"]:
                     try:
-                        q = eurostat("namq_10_gdp", "geo=%s&s_adj=SCA&unit=CLV_PCH_PRE&na_item=B1GQ" % geo, "%d-Q1" % (TODAY.year - HIST_YEARS - 1))
+                        s = eurostat("namq_10_gdp", "geo=%s&s_adj=SCA&unit=CLV_PCH_PRE&na_item=B1GQ" % geo, "%d-Q1" % (TODAY.year - HIST_YEARS - 1))
                         break
                     except Exception as e:
                         err = e
-                if q is None:
+                if s is None:
                     raise RuntimeError(err)
-                s = qoq_to_yoy(q)
-            if not s:
-                raise RuntimeError("not enough history to compute year-on-year growth")
+            if len(s) < 8:
+                raise RuntimeError("not enough quarterly history")
             return growth_block(s, "Q")
 
         def rate():
             if c["bis"] not in rate_all:
                 raise RuntimeError("no BIS policy-rate data for %s" % c["bis"])
-            return rate_block(rate_all[c["bis"]])
+            return rate_block(rate_all[c["bis"]], c.get("rate_adjust", 0.0))
 
         attempt("prices", prices)
         attempt("jobs", jobs)
@@ -404,7 +392,7 @@ def main():
         countries.append(new)
 
     out = {"generated": dt.datetime.now(dt.timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ"),
-           "demo": DEMO, "history_years": HIST_YEARS, "countries": countries}
+           "demo": DEMO, "schema": SCHEMA, "history_years": HIST_YEARS, "countries": countries}
     path = OUT if not DEMO else os.path.join(ROOT, "data.demo.json")
     with open(path, "w", encoding="utf-8") as f:
         json.dump(out, f, ensure_ascii=False, indent=1)
