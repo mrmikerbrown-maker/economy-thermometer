@@ -1,5 +1,5 @@
 {
- "generated": "2026-10-19T14:33:55Z",
+ "generated": "2026-10-20T11:33:30Z",
  "demo": false,
  "schema": 3,
  "history_years": 10,
@@ -389,30 +389,30 @@
     "asof_label": "Q2 2026",
     "state": "normal",
     "range_lo": 0.2,
-    "range_hi": 0.72,
-    "pos": 45.6,
-    "zone_l": 32.4,
-    "zone_r": 49.8,
+    "range_hi": 0.7,
+    "pos": 44.2,
+    "zone_l": 31.5,
+    "zone_r": 47.4,
     "trail": [
      {
       "k": "Q2 2025",
       "v": 0.0,
-      "pos": 25.8
+      "pos": 25.2
      },
      {
       "k": "Q3 2025",
       "v": 0.3,
-      "pos": 35.7
+      "pos": 34.7
      },
      {
       "k": "Q4 2025",
       "v": 0.2,
-      "pos": 32.4
+      "pos": 31.5
      },
      {
       "k": "Q1 2026",
       "v": 0.0,
-      "pos": 25.8
+      "pos": 25.2
      }
     ],
     "ago": {
