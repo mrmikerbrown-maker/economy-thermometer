@@ -102,7 +102,9 @@ def fred_csv(series_id, freq):
         if len(r) < 2 or r[1] in ("", "."):
             continue
         try:
-            out.append((date_to_key(r[0], freq), float(r[1])))
+            value = float(r[1])
+            if math.isfinite(value):
+                out.append((date_to_key(r[0], freq), value))
         except ValueError:
             continue
     if not out:
@@ -115,7 +117,9 @@ def bis_csv(flow, key, start):
     out = {}
     for r in csv.DictReader(io.StringIO(text)):
         try:
-            out.setdefault(r["REF_AREA"], []).append((r["TIME_PERIOD"][:7], float(r["OBS_VALUE"])))
+            value = float(r["OBS_VALUE"])
+            if math.isfinite(value):
+                out.setdefault(r["REF_AREA"], []).append((r["TIME_PERIOD"][:7], value))
         except (KeyError, ValueError):
             continue
     if not out:
@@ -132,7 +136,7 @@ def eurostat(dataset, params, since):
     vals = j.get("value", {})
     if isinstance(vals, list):
         vals = {str(i): v for i, v in enumerate(vals) if v is not None}
-    out = [(p, float(vals[str(i)])) for p, i in idx.items() if str(i) in vals]
+    out = [(p, float(vals[str(i)])) for p, i in idx.items() if str(i) in vals and vals[str(i)] is not None and math.isfinite(float(vals[str(i)]))]
     if not out:
         raise RuntimeError("Eurostat %s returned no observations" % dataset)
     return sorted(out)
@@ -423,8 +427,12 @@ def main():
     out = {"generated": dt.datetime.now(dt.timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ"),
            "demo": DEMO, "schema": SCHEMA, "history_years": HIST_YEARS, "countries": countries}
     path = OUT if not DEMO else os.path.join(ROOT, "data.demo.json")
-    with open(path, "w", encoding="utf-8") as f:
-        json.dump(out, f, ensure_ascii=False, indent=1)
+    # Validate before touching the last usable file. JSON forbids NaN and infinity.
+    payload = json.dumps(out, ensure_ascii=False, indent=1, allow_nan=False)
+    temporary = path + ".tmp"
+    with open(temporary, "w", encoding="utf-8") as f:
+        f.write(payload)
+    os.replace(temporary, path)
     print("\n".join(log))
     print("\nWrote %s" % path)
     if problems:
