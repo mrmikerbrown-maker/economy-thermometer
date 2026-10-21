@@ -128,6 +128,7 @@ function f1(x){return (+x).toFixed(1)}
 function esc(s){return String(s).replace(/[&<>"]/g,function(c){return{"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]})}
 function pill(b){return b?'<span class="pl '+b.state+'">'+W[b.state]+'</span>':'<span class="pl none">n/a</span>'}
 function overview(){var h='<div class="hd"><span>Economy</span><span>Prices</span><span>Jobs</span><span>Growth</span><span>Rate</span><span>Overall</span></div>';
+function overview(){var h='<div class="hd"><span>Economy</span><span>Prices</span><span>Jobs</span><span>Growth</span><span>Interest Rate</span><span>Overall</span></div>';
  D.countries.forEach(function(c,i){h+='<button type="button" class="rw'+(i===sel?" on":"")+'" data-i="'+i+'" aria-pressed="'+(i===sel)+'"><span class="nm">'+esc(c.short)+'</span>'+pill(c.prices)+pill(c.jobs)+pill(c.growth)+'<span class="rt">'+(c.rate?num(c.rate.value,2)+"%":"n/a")+'</span><span>'+(c.verdict?'<span class="vd '+c.verdict+'">'+VW[c.verdict]+'</span>':'')+'</span></button>'});
  $("ov").innerHTML=h}
 function trend(title,b){
@@ -195,6 +196,5 @@ $("dt").addEventListener("focusin",showReading);
 if(window.__EMBED){D=window.__EMBED;render()}
 else{$("upd").textContent="Loading…";fetch("data.json?"+Date.now()).then(function(r){return r.json()}).then(function(j){D=j;render()}).catch(function(){$("ov").innerHTML='<p class="empty">Could not load the data.</p>';$("upd").textContent=""})}
 </script>
-
 </body>
 </html>
