@@ -56,7 +56,15 @@ h1{font-size:clamp(22px,4.4vw,30px);line-height:1.15;margin:0 0 8px;color:var(--
 .old{color:var(--pink)}
 .bar{position:relative;height:12px;border-radius:99px;background:linear-gradient(90deg,#0b6b7a 0%,#00E0FF 8%,#1c2a33 32%,#2a2d3a 50%,#33242c 68%,#FF3B6B 92%,#a01c3e 100%);margin:0 6px}
 .bar.rev{background:linear-gradient(270deg,#0b6b7a 0%,#00E0FF 8%,#1c2a33 32%,#2a2d3a 50%,#33242c 68%,#FF3B6B 92%,#a01c3e 100%)}
-.tp{position:absolute;top:50%;width:6px;height:6px;margin:-3px 0 0 -3px;border-radius:50%;background:#fff;box-shadow:0 0 0 1px rgba(6,6,10,.55)}
+/* Time is separate from the thermometer's value axis. */
+.trend{margin-top:16px;padding-top:10px;border-top:1px solid var(--line)}
+.trend-head,.trend-dates{display:flex;justify-content:space-between;gap:8px;font-size:11px;color:var(--muted)}
+.trend-head output{color:var(--text2);font-variant-numeric:tabular-nums;text-align:right}
+.trend-plot{position:relative;height:78px;margin:6px 12px 2px}
+.trend-plot svg{display:block;width:100%;height:100%;overflow:visible}
+.trend-point{position:absolute;transform:translate(-50%,-50%);width:24px;height:28px;background:transparent;border:0;padding:0;cursor:pointer;border-radius:6px}
+.trend-point:focus-visible{outline:2px solid var(--accent)}
+.trend-dates span:last-child{color:var(--text);text-align:right}
 .gt>.ago{font-size:12px;color:var(--dim)}
 .zone{position:absolute;top:-4px;bottom:-4px;border:1.5px solid var(--text2);border-radius:6px;background:rgba(255,255,255,.07)}
 .zl{position:absolute;top:20px;font-size:11px;color:var(--text2);transform:translateX(-50%);white-space:nowrap}
@@ -94,7 +102,7 @@ h1{font-size:clamp(22px,4.4vw,30px);line-height:1.15;margin:0 0 8px;color:var(--
 <div class="note"><p id="upd"></p><details><summary>How to read this</summary><ul>
 <li><b>Hot, warm, in line, cool, cold:</b> prices are compared with the central bank's own inflation target. Unemployment and growth are compared with that country's last 10 years. If the latest reading falls within the middle half of those readings it is rated "in line", and the further outside it falls, the hotter or colder it is rated.</li>
 <li><b>Prices</b> are headline consumer price inflation, the change over the last 12 months. <b>Jobs</b> is the unemployment rate, so low unemployment counts as hot (its bar runs the other way, so the number rises left to right). <b>Growth</b> is GDP growth on the previous quarter, after inflation and not annualised, so US figures look smaller than the annualised number usually quoted.</li>
-<li><b>Faint dots</b> show where each of the last 12 months stood (the last four quarters for growth), with the oldest faintest, so you can see which way things are moving.</li>
+<li><b>Trend lines</b> run from older readings on the left to the latest on the right, marked by a white dot. Tap or focus a point for its date and value. Each chart uses its own scale and covers about a year; gaps mean missing observations. Higher means a higher reported number, including unemployment.</li>
 <li><b>Targets used:</b> 2% for the US, euro area, UK, Japan, Norway and Sweden (within half a point of the target counts as in line), 1 to 3% for Canada and New Zealand, 2 to 3% for Australia and 0 to 2% for Switzerland. The Fed targets a slightly different measure of inflation (PCE) that usually runs a little lower than the CPI shown here.</li>
 <li><b>Timing:</b> each figure is the latest published, so the dates differ between countries and indicators. Some are a few months old. Unemployment follows the international survey-based definition, so the Swiss figure is higher than the registered rate quoted locally.</li>
 <li><b>Interest rate:</b> the central bank's main policy rate. For the US it is the upper end of the Fed's target range. "Usually" matters: central banks look at many things, and this is a summary, not a forecast. Not trading advice.</li>
@@ -114,15 +122,28 @@ function pill(b){return b?'<span class="pl '+b.state+'">'+W[b.state]+'</span>':'
 function overview(){var h='<div class="hd"><span>Economy</span><span>Prices</span><span>Jobs</span><span>Growth</span><span>Rate</span><span>Overall</span></div>';
  D.countries.forEach(function(c,i){h+='<button type="button" class="rw'+(i===sel?" on":"")+'" data-i="'+i+'" aria-pressed="'+(i===sel)+'"><span class="nm">'+esc(c.short)+'</span>'+pill(c.prices)+pill(c.jobs)+pill(c.growth)+'<span class="rt">'+(c.rate?num(c.rate.value,2)+"%":"n/a")+'</span><span>'+(c.verdict?'<span class="vd '+c.verdict+'">'+VW[c.verdict]+'</span>':'')+'</span></button>'});
  $("ov").innerHTML=h}
+function trend(title,b){
+ var months=["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
+ function time(k){var m=k.match(/^Q([1-4]) (\d{4})$/);if(m)return +m[2]*12+(+m[1]-1)*3;var a=k.split(" ");return +a[1]*12+months.indexOf(a[0])}
+ var points=(b.trail||[]).filter(function(t){return Number.isFinite(t.v)}).concat([{k:b.asof_label,v:b.value}]);
+ if(points.length<2)return '<div class="trend"><span class="empty">Not enough history to show a trend.</span></div>';
+ var first=time(points[0].k),last=time(b.asof_label),vals=points.map(function(t){return t.v}),lo=Math.min.apply(null,vals),hi=Math.max.apply(null,vals),pad=Math.max((hi-lo)*.2,.1);
+ lo-=pad;hi+=pad;
+ var path="",buttons="",dots="",previous=null,step=/^Q/.test(b.asof_label)?3:1;
+ points.forEach(function(t,i){var tm=time(t.k),x=(tm-first)/(last-first)*100,y=100-(t.v-lo)/(hi-lo)*100,latest=i===points.length-1,label=t.k+": "+f1(t.v)+"%"+(latest?" · latest":"");
+ path+=(previous===null||tm-previous>step?"M":"L")+(x*7).toFixed(2)+","+(y*.78).toFixed(2)+" ";previous=tm;
+ dots+='<circle cx="'+(x*7)+'" cy="'+(y*.78)+'" r="'+(latest?4:2.5)+'" fill="'+(latest?'#FFFFFF':'#8A8FA3')+'"/>';
+ buttons+='<button type="button" class="trend-point" style="left:'+x+'%;top:'+y+'%" aria-label="'+esc(title+", "+label)+'" data-reading="'+esc(label)+'" title="'+esc(label)+'"></button>';
+ });
+ return '<div class="trend"><div class="trend-head"><span>Recent trend · '+f1(Math.min.apply(null,vals))+'–'+f1(Math.max.apply(null,vals))+'%</span><output aria-live="polite">'+esc(b.asof_label)+': '+f1(b.value)+'% · latest</output></div><div class="trend-plot"><svg viewBox="0 0 700 78" preserveAspectRatio="none" aria-hidden="true"><path d="'+path+'" fill="none" stroke="#00E0FF" stroke-width="2" vector-effect="non-scaling-stroke"/>'+dots+'</svg>'+buttons+'</div><div class="trend-dates"><span>'+esc(points[0].k)+'</span><span>'+esc(b.asof_label)+' · latest →</span></div></div>';
+}
 function strip(title,b,detail,left,right,zoneText,flip){
  if(!b)return '<div class="g"><div class="gt"><b>'+title+'</b><span>No data yet.</span></div></div>';
  var bp=flip?100-b.pos:b.pos,zl=flip?100-b.zone_r:b.zone_l,zr=flip?100-b.zone_l:b.zone_r;var pos=Math.max(1.5,Math.min(98.5,bp));var cls=pos<10?" l":pos>90?" r":"";
- var dots="",n=(b.trail||[]).length;(b.trail||[]).forEach(function(t,i){var tp=Math.max(1.5,Math.min(98.5,flip?100-t.pos:t.pos));dots+='<i class="tp" style="left:'+tp+'%;opacity:'+(0.25+0.55*(i+1)/n).toFixed(2)+'" title="'+esc(t.k)+': '+f1(t.v)+'%"></i>'});
- var ago=b.ago?'<span class="ago">12 months ago: '+f1(b.ago.value)+'% ('+esc(b.ago.label)+')</span>':"";
  var old=b.stale?' <span class="old">(older data)</span>':"";
- return '<div class="g"><div class="gt"><b>'+title+'<span class="v '+b.state+'">'+W[b.state]+'</span></b><span>'+detail+" ("+esc(b.asof_label)+")"+old+'</span>'+ago+'</div>'+
- '<div class="bar'+(flip?" rev":"")+'"><div class="zone" style="left:'+zl+'%;width:'+(zr-zl)+'%"></div>'+dots+'<div class="zl" style="left:'+((zl+zr)/2)+'%">'+zoneText+'</div><div class="mk'+cls+'" style="left:'+pos+'%"><div class="mv">'+f1(b.value)+'%</div></div></div>'+
- '<div class="ends"><span>'+left+'</span><span>'+right+'</span></div></div>'}
+ return '<div class="g"><div class="gt"><b>'+title+'<span class="v '+b.state+'">'+W[b.state]+'</span></b><span>'+detail+" ("+esc(b.asof_label)+")"+old+'</span>'+'</div>'+
+ '<div class="bar'+(flip?" rev":"")+'"><div class="zone" style="left:'+zl+'%;width:'+(zr-zl)+'%"></div>'+'<div class="zl" style="left:'+((zl+zr)/2)+'%">'+zoneText+'</div><div class="mk'+cls+'" style="left:'+pos+'%"><div class="mv">'+f1(b.value)+'%</div></div></div>'+
+ '<div class="ends"><span>'+left+'</span><span>'+right+'</span></div>'+trend(title,b)+'</div>'}
 var PT={hot:"Inflation is well above the central bank's target",warm:"Inflation is above the central bank's target",normal:"Inflation is in line with the central bank's target",cool:"Inflation is below the central bank's target",cold:"Inflation is well below the central bank's target"};
 var JT={hot:"Unemployment is very low",warm:"Unemployment is low",normal:"Unemployment is in line with its 10-year average",cool:"Unemployment is high",cold:"Unemployment is very high"};
 var GT={hot:"Growth is unusually strong",warm:"Growth is strong",normal:"Growth is in line with its 10-year average",cool:"Growth is weak",cold:"Growth is very weak"};
@@ -152,6 +173,9 @@ function render(){if(!D||!D.countries||!D.countries.length){$("ov").innerHTML='<
  else $("upd").textContent="";
  overview();detail()}
 $("ov").addEventListener("click",function(e){var b=e.target.closest(".rw");if(!b)return;sel=+b.getAttribute("data-i");overview();detail()});
+function showReading(e){var point=e.target.closest(".trend-point");if(point)point.closest(".trend").querySelector("output").textContent=point.getAttribute("data-reading")}
+$("dt").addEventListener("click",showReading);
+$("dt").addEventListener("focusin",showReading);
 if(window.__EMBED){D=window.__EMBED;render()}
 else{$("upd").textContent="Loading…";fetch("data.json?"+Date.now()).then(function(r){return r.json()}).then(function(j){D=j;render()}).catch(function(){$("ov").innerHTML='<p class="empty">Could not load the data.</p>';$("upd").textContent=""})}
 </script>
