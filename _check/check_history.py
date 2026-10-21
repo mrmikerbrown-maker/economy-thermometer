@@ -8,9 +8,9 @@ START = "2004-01-01"
 
 
 def get(url):
-    for i in range(3):
+    for i in range(2):
         try:
-            with urlopen(Request(url, headers={"User-Agent": UA}), timeout=60) as r:
+            with urlopen(Request(url, headers={"User-Agent": UA}), timeout=25) as r:
                 return r.read().decode("utf-8", "replace")
         except Exception as e:
             err = e

@@ -30,6 +30,8 @@ SCHEMA = 3  # bump when the meaning of a stored figure changes, so old values ar
 DEMO = "--demo" in sys.argv
 TODAY = dt.date.today()
 HIST_YEARS = CFG.get("history_years", 10)
+COMPASS_YEARS = CFG.get("compass_years", 20)
+FETCH_YEARS = max(HIST_YEARS, COMPASS_YEARS) + 2  # extra years so the first year-on-year figures exist
 MONTHS = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"]
 SCORE = {"cold": -2, "cool": -1, "normal": 0, "warm": 1, "hot": 2}
 
@@ -94,7 +96,7 @@ def date_to_key(d, freq):
 
 
 def fred_csv(series_id, freq):
-    start = "%d-01-01" % (TODAY.year - HIST_YEARS - 2)
+    start = "%d-01-01" % (TODAY.year - FETCH_YEARS)
     text = get("https://fred.stlouisfed.org/graph/fredgraph.csv?id=%s&cosd=%s" % (series_id, start))
     rows = list(csv.reader(io.StringIO(text)))
     out = []
@@ -305,6 +307,84 @@ def rate_block(series, adjust=0.0):
             "since_label": label(series[0][0])}
 
 
+# ----------------------------------------------------------------------------- the compass ("Over time" view)
+
+
+def m_to_q(key):
+    return qkey(int(key[:4]), (int(key[5:7]) - 1) // 3 + 1)
+
+
+def quarterly_mean(monthly):
+    """Monthly readings -> the average of each complete quarter."""
+    acc = {}
+    for k, v in monthly:
+        acc.setdefault(m_to_q(k), []).append(v)
+    return sorted((q, sum(v) / len(v)) for q, v in acc.items() if len(v) == 3)
+
+
+def yoy(series, step):
+    """Year-on-year % change of a level series (monthly: step 12, quarterly: step 4)."""
+    d = dict(series)
+    add = month_add if step == 12 else q_add
+    return [(k, (v / d[add(k, -step)] - 1) * 100) for k, v in sorted(d.items()) if d.get(add(k, -step))]
+
+
+def qoq_to_yoy(qoq):
+    """Growth on the previous quarter -> growth on the same quarter a year earlier, by compounding four quarters."""
+    d = dict(qoq)
+    out = []
+    for k in sorted(d):
+        ks = [q_add(k, -i) for i in range(4)]
+        if all(x in d for x in ks):
+            f = 1.0
+            for x in ks:
+                f *= 1 + d[x] / 100
+            out.append((k, (f - 1) * 100))
+    return out
+
+
+def recession_quarters(qoq):
+    """Two or more quarters in a row of falling GDP (the usual rule of thumb)."""
+    keys = [k for k, v in qoq if v < 0]
+    neg = set(keys)
+    return {k for k in keys if q_add(k, -1) in neg or q_add(k, 1) in neg}
+
+
+def cycles(keys, rec, step, min_len):
+    """Split the timeline into business cycles. Each cycle starts at the end of a recession (the trough)
+    and runs to the end of the next one. Cycles shorter than min_len periods are merged into the one before."""
+    troughs = [i for i, k in enumerate(keys) if k in rec and (i + 1 == len(keys) or keys[i + 1] not in rec)]
+    bounds = [0] + [t for t in troughs if 0 < t < len(keys) - 1] + [len(keys) - 1]
+    segs = [[bounds[i], bounds[i + 1]] for i in range(len(bounds) - 1)]
+    merged = []
+    for a, b in segs:
+        if merged and (b - a < min_len or merged[-1][1] - merged[-1][0] < min_len):
+            merged[-1][1] = b
+        else:
+            merged.append([a, b])
+    if len(merged) > 1 and merged[-1][1] - merged[-1][0] < min_len:
+        merged[-2][1] = merged.pop()[1]
+    return merged
+
+
+def compass_view(xs, ys, rec, freq, x_center):
+    """Pair two series period by period and split them into cycles."""
+    yd = dict(ys)
+    first = q_add(m_to_q(TODAY.strftime("%Y-%m")), -4 * COMPASS_YEARS) if freq == "Q" else month_add(TODAY.strftime("%Y-%m"), -12 * COMPASS_YEARS)
+    pts = [(k, x, yd[k]) for k, x in xs if k in yd and k >= first]
+    if len(pts) < (12 if freq == "Q" else 36):
+        raise RuntimeError("not enough history for the compass")
+    keys = [k for k, _, _ in pts]
+    segs = cycles(keys, rec, 1, 8 if freq == "Q" else 24)
+    cyc = [{"from": a, "to": b, "label": "%s–%s" % (keys[a][:4], "now" if b == len(keys) - 1 else keys[b][2:4])} for a, b in segs]
+    return {"freq": freq, "x_center": round(x_center, 2),
+            "pts": [[label(k), round(x, 2), round(y, 2), 1 if k in rec else 0] for k, x, y in pts], "cycles": cyc}
+
+
+def median(vals):
+    return pct(sorted(vals), 0.5)
+
+
 # ----------------------------------------------------------------------------- the run
 
 
@@ -326,7 +406,7 @@ def main():
     prev = load_previous()
     log, problems = [], []
     areas = "+".join(c["bis"] for c in CFG["countries"])
-    start_cpi = "%d-01" % (TODAY.year - 3)
+    start_cpi = "%d-01" % (TODAY.year - FETCH_YEARS)
     try:
         cpi_all = bis_csv("WS_LONG_CPI", "M.%s.628" % areas, start_cpi)
         log.append("OK   BIS inflation index")
@@ -339,11 +419,18 @@ def main():
     except Exception as e:
         rate_all = {}
         log.append("FAIL BIS policy rates: %s" % e)
+    try:
+        usrec = {k for k, v in fred_csv("USREC", "M") if v >= 1}
+        log.append("OK   NBER US recession dates")
+    except Exception as e:
+        usrec = None
+        log.append("FAIL NBER US recession dates: %s (falling-GDP rule used instead)" % e)
 
     countries = []
     for c in CFG["countries"]:
         code, old = c["code"], prev.get(c["code"], {})
         new = {"code": code, "name": c["name"], "short": c["short"], "bank": c["bank"], "bank_short": c["bank_short"]}
+        raw = {}  # full-length series fetched for the thermometer, reused by the compass
 
         def attempt(name, fn):
             try:
@@ -375,25 +462,27 @@ def main():
                 s, err = None, None
                 for geo in j["geo"]:
                     try:
-                        s = eurostat("une_rt_m", "geo=%s&s_adj=SA&age=TOTAL&sex=T&unit=PC_ACT" % geo, "%d-01" % (TODAY.year - HIST_YEARS - 1))
+                        s = eurostat("une_rt_m", "geo=%s&s_adj=SA&age=TOTAL&sex=T&unit=PC_ACT" % geo, "%d-01" % (TODAY.year - FETCH_YEARS))
                         break
                     except Exception as e:
                         err = e
                 if s is None:
                     raise RuntimeError(err)
+            raw["jobs"] = s
             return jobs_block(s, j["freq"])
 
         def growth():
             g = c["growth"]
             if g["src"] == "fred_level":
-                s = level_to_qoq(fred_csv(g["id"], "Q"))
+                raw["gdp_level"] = fred_csv(g["id"], "Q")
+                s = level_to_qoq(raw["gdp_level"])
             elif g["src"] == "fred_qoq":
                 s = fred_csv(g["id"], "Q")
             else:
                 s, err = None, None
                 for geo in g["geo"]:
                     try:
-                        s = eurostat("namq_10_gdp", "geo=%s&s_adj=SCA&unit=CLV_PCH_PRE&na_item=B1GQ" % geo, "%d-Q1" % (TODAY.year - HIST_YEARS - 1))
+                        s = eurostat("namq_10_gdp", "geo=%s&s_adj=SCA&unit=CLV_PCH_PRE&na_item=B1GQ" % geo, "%d-Q1" % (TODAY.year - FETCH_YEARS))
                         break
                     except Exception as e:
                         err = e
@@ -401,6 +490,7 @@ def main():
                     raise RuntimeError(err)
             if len(s) < 8:
                 raise RuntimeError("not enough quarterly history")
+            raw["gdp_qoq"] = s
             return growth_block(s, "Q")
 
         def rate():
@@ -408,10 +498,37 @@ def main():
                 raise RuntimeError("no BIS policy-rate data for %s" % c["bis"])
             return rate_block(rate_all[c["bis"]], c.get("rate_adjust", 0.0))
 
+        def compass():
+            if c["bis"] not in cpi_all or "jobs" not in raw or "gdp_qoq" not in raw:
+                raise RuntimeError("needs this run's inflation, unemployment and growth data")
+            index = cpi_all[c["bis"]]
+            infl_q = yoy(quarterly_mean(index), 4)  # quarterly average of the index, then year on year
+            gdp_yoy = yoy(raw["gdp_level"], 4) if "gdp_level" in raw else qoq_to_yoy(raw["gdp_qoq"])
+            if usrec is not None and code == "US":
+                rec_q = {m_to_q(k) for k in usrec}
+                rec_m = set(usrec)
+            else:
+                rec_q = recession_quarters(raw["gdp_qoq"])
+                rec_m = {month_add(mkey(int(q[:4]), int(q[-1]) * 3), -i) for q in rec_q for i in range(3)}
+            tail = [v for _, v in gdp_yoy[-HIST_YEARS * 4:]]
+            out = {"asof_label": label(gdp_yoy[-1][0]), "infl_center": round((c["target"]["lo"] + c["target"]["hi"]) / 2, 2),
+                   "target": c["target"]["label"], "rec_rule": "nber" if code == "US" and usrec is not None else "gdp",
+                   "growth": compass_view(gdp_yoy, infl_q, rec_q, "Q", median(tail))}
+            jobs_m = raw["jobs"] if c["jobs"]["freq"] == "M" else None
+            if jobs_m and c.get("cpi_freq", "M") == "M":
+                un, infl, rec, fq = jobs_m, cpi_yoy(index), rec_m, "M"
+            else:
+                un = quarterly_mean(jobs_m) if jobs_m else raw["jobs"]
+                un, infl, rec, fq = un, infl_q, rec_q, "Q"
+            n = HIST_YEARS * (12 if fq == "M" else 4)
+            out["unemp"] = compass_view(un, infl, rec, fq, median([v for _, v in un[-n:]]))
+            return out
+
         attempt("prices", prices)
         attempt("jobs", jobs)
         attempt("growth", growth)
         attempt("rate", rate)
+        attempt("compass", compass)
 
         for name, freq in (("prices", "M"), ("jobs", c["jobs"]["freq"]), ("growth", "Q")):
             if name in new:
