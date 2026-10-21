@@ -60,11 +60,19 @@ h1{font-size:clamp(22px,4.4vw,30px);line-height:1.15;margin:0 0 8px;color:var(--
 .trend{margin-top:16px;padding-top:10px;border-top:1px solid var(--line)}
 .trend-head,.trend-dates{display:flex;justify-content:space-between;gap:8px;font-size:11px;color:var(--muted)}
 .trend-head output{color:var(--text2);font-variant-numeric:tabular-nums;text-align:right}
-.trend-plot{position:relative;height:78px;margin:6px 12px 2px}
+.trend-plot{position:relative;height:120px;margin:24px 14px 38px 48px;border-left:1px solid var(--dim);border-bottom:1px solid var(--dim)}
 .trend-plot svg{display:block;width:100%;height:100%;overflow:visible}
 .trend-point{position:absolute;transform:translate(-50%,-50%);width:24px;height:28px;background:transparent;border:0;padding:0;cursor:pointer;border-radius:6px}
 .trend-point:focus-visible{outline:2px solid var(--accent)}
 .trend-dates span:last-child{color:var(--text);text-align:right}
+.trend-y{position:absolute;right:calc(100% + 8px);transform:translateY(-50%);font-size:11px;color:var(--muted);white-space:nowrap;font-variant-numeric:tabular-nums}
+.trend-x{position:absolute;top:calc(100% + 8px);transform:translateX(-50%);font-size:10px;color:var(--muted);text-align:center;white-space:nowrap;line-height:1.3}
+.trend-grid{position:absolute;left:0;right:0;height:1px;background:var(--line);pointer-events:none}
+.trend-tip{display:none;position:absolute;bottom:calc(100% + 5px);left:50%;transform:translateX(-50%);padding:6px 9px;border-radius:6px;background:var(--text);color:var(--bg);font:600 12px ui-sans-serif,system-ui,sans-serif;white-space:nowrap;box-shadow:0 2px 10px #06060A;pointer-events:none;z-index:3}
+.trend-point:hover .trend-tip,.trend-point:focus .trend-tip{display:block}
+.trend-point:first-of-type .trend-tip{left:-12px;transform:none}
+.trend-point:last-of-type .trend-tip{left:auto;right:-12px;transform:none}
+.trend-point:hover,.trend-point:focus{z-index:4}
 .gt>.ago{font-size:12px;color:var(--dim)}
 .zone{position:absolute;top:-4px;bottom:-4px;border:1.5px solid var(--text2);border-radius:6px;background:rgba(255,255,255,.07)}
 .zl{position:absolute;top:20px;font-size:11px;color:var(--text2);transform:translateX(-50%);white-space:nowrap}
@@ -102,7 +110,7 @@ h1{font-size:clamp(22px,4.4vw,30px);line-height:1.15;margin:0 0 8px;color:var(--
 <div class="note"><p id="upd"></p><details><summary>How to read this</summary><ul>
 <li><b>Hot, warm, in line, cool, cold:</b> prices are compared with the central bank's own inflation target. Unemployment and growth are compared with that country's last 10 years. If the latest reading falls within the middle half of those readings it is rated "in line", and the further outside it falls, the hotter or colder it is rated.</li>
 <li><b>Prices</b> are headline consumer price inflation, the change over the last 12 months. <b>Jobs</b> is the unemployment rate, so low unemployment counts as hot (its bar runs the other way, so the number rises left to right). <b>Growth</b> is GDP growth on the previous quarter, after inflation and not annualised, so US figures look smaller than the annualised number usually quoted.</li>
-<li><b>Trend lines</b> run from older readings on the left to the latest on the right, marked by a white dot. Tap or focus a point for its date and value. Each chart uses its own scale and covers about a year; gaps mean missing observations. Higher means a higher reported number, including unemployment.</li>
+<li><b>Trend lines</b> run from older readings on the left to the latest on the right, marked by a white dot. Hover, tap or focus a point for its date and value. Dates run along the bottom and percentage values up the left. Each chart uses its own scale and covers about a year; gaps mean missing observations. Higher means a higher reported number, including unemployment.</li>
 <li><b>Targets used:</b> 2% for the US, euro area, UK, Japan, Norway and Sweden (within half a point of the target counts as in line), 1 to 3% for Canada and New Zealand, 2 to 3% for Australia and 0 to 2% for Switzerland. The Fed targets a slightly different measure of inflation (PCE) that usually runs a little lower than the CPI shown here.</li>
 <li><b>Timing:</b> each figure is the latest published, so the dates differ between countries and indicators. Some are a few months old. Unemployment follows the international survey-based definition, so the Swiss figure is higher than the registered rate quoted locally.</li>
 <li><b>Interest rate:</b> the central bank's main policy rate. For the US it is the upper end of the Fed's target range. "Usually" matters: central banks look at many things, and this is a summary, not a forecast. Not trading advice.</li>
@@ -129,13 +137,21 @@ function trend(title,b){
  if(points.length<2)return '<div class="trend"><span class="empty">Not enough history to show a trend.</span></div>';
  var first=time(points[0].k),last=time(b.asof_label),vals=points.map(function(t){return t.v}),lo=Math.min.apply(null,vals),hi=Math.max.apply(null,vals),pad=Math.max((hi-lo)*.2,.1);
  lo-=pad;hi+=pad;
+ var raw=(hi-lo)/4,power=Math.pow(10,Math.floor(Math.log10(raw))),fraction=raw/power,tick=(fraction<=1?1:fraction<=2?2:fraction<=2.5?2.5:fraction<=5?5:10)*power;
+ tick=Math.max(.1,tick);lo=Math.floor(lo/tick)*tick;hi=Math.ceil(hi/tick)*tick;
+ var axes="";
+ for(var v=lo;v<=hi+tick*.01;v+=tick){var ytick=100-(v-lo)/(hi-lo)*100;
+ axes+='<span class="trend-y" style="top:'+ytick+'%">'+f1(Math.abs(v)<.00001?0:v)+'%</span><div class="trend-grid" style="top:'+ytick+'%"></div>'}
+ var count=Math.min(4,last-first);
+ for(var n=0;n<=count;n++){var tm=first+Math.round((last-first)*n/count),quarter=/^Q/.test(b.asof_label),date=quarter?'Q'+(Math.floor((tm%12)/3)+1):months[tm%12];
+ axes+='<span class="trend-x" style="left:'+((tm-first)/(last-first)*100)+'%">'+date+'<br>'+Math.floor(tm/12)+'</span>'}
  var path="",buttons="",dots="",previous=null,step=/^Q/.test(b.asof_label)?3:1;
  points.forEach(function(t,i){var tm=time(t.k),x=(tm-first)/(last-first)*100,y=100-(t.v-lo)/(hi-lo)*100,latest=i===points.length-1,label=t.k+": "+f1(t.v)+"%"+(latest?" · latest":"");
- path+=(previous===null||tm-previous>step?"M":"L")+(x*7).toFixed(2)+","+(y*.78).toFixed(2)+" ";previous=tm;
- dots+='<circle cx="'+(x*7)+'" cy="'+(y*.78)+'" r="'+(latest?4:2.5)+'" fill="'+(latest?'#FFFFFF':'#8A8FA3')+'"/>';
- buttons+='<button type="button" class="trend-point" style="left:'+x+'%;top:'+y+'%" aria-label="'+esc(title+", "+label)+'" data-reading="'+esc(label)+'" title="'+esc(label)+'"></button>';
+ path+=(previous===null||tm-previous>step?"M":"L")+(x*7).toFixed(2)+","+(y*1.2).toFixed(2)+" ";previous=tm;
+ dots+='<circle cx="'+(x*7)+'" cy="'+(y*1.2)+'" r="'+(latest?4:2.5)+'" fill="'+(latest?'#FFFFFF':'#8A8FA3')+'"/>';
+ buttons+='<button type="button" class="trend-point" style="left:'+x+'%;top:'+y+'%" aria-label="'+esc(title+", "+label)+'" data-reading="'+esc(label)+'" ><span class="trend-tip" aria-hidden="true">'+esc(label)+'</span></button>';
  });
- return '<div class="trend"><div class="trend-head"><span>Recent trend · '+f1(Math.min.apply(null,vals))+'–'+f1(Math.max.apply(null,vals))+'%</span><output aria-live="polite">'+esc(b.asof_label)+': '+f1(b.value)+'% · latest</output></div><div class="trend-plot"><svg viewBox="0 0 700 78" preserveAspectRatio="none" aria-hidden="true"><path d="'+path+'" fill="none" stroke="#00E0FF" stroke-width="2" vector-effect="non-scaling-stroke"/>'+dots+'</svg>'+buttons+'</div><div class="trend-dates"><span>'+esc(points[0].k)+'</span><span>'+esc(b.asof_label)+' · latest →</span></div></div>';
+ return '<div class="trend"><div class="trend-head"><span>Recent trend · '+f1(Math.min.apply(null,vals))+'–'+f1(Math.max.apply(null,vals))+'%</span><output aria-live="polite">'+esc(b.asof_label)+': '+f1(b.value)+'% · latest</output></div><div class="trend-plot">'+axes+'<svg style="position:relative" viewBox="0 0 700 120" preserveAspectRatio="none" aria-hidden="true"><path d="'+path+'" fill="none" stroke="#00E0FF" stroke-width="2" vector-effect="non-scaling-stroke"/>'+dots+'</svg>'+buttons+'</div><div class="trend-dates"><span>'+esc(points[0].k)+'</span><span>'+esc(b.asof_label)+' · latest →</span></div></div>';
 }
 function strip(title,b,detail,left,right,zoneText,flip){
  if(!b)return '<div class="g"><div class="gt"><b>'+title+'</b><span>No data yet.</span></div></div>';
