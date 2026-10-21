@@ -53,4 +53,3 @@ OK   SE rate (Sep 2026)
 FAIL SE compass: needs this run's inflation, unemployment and growth data
 
 Wrote /home/runner/work/economy-thermometer/economy-thermometer/data.json
-::error::No data at all for: US compass, GB compass, JP compass, CH compass, CA compass, AU compass, NZ compass, NO compass, SE compass
