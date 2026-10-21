@@ -1,0 +1,56 @@
+OK   BIS inflation index
+OK   BIS policy rates
+FAIL NBER US recession dates: FRED USREC returned no data (falling-GDP rule used instead)
+OK   US prices (Aug 2026)
+KEPT US jobs: new fetch failed (FRED UNRATE returned no data); showing previous value
+KEPT US growth: new fetch failed (FRED GDPC1 returned no data); showing previous value
+OK   US rate (Sep 2026)
+FAIL US compass: needs this run's inflation, unemployment and growth data
+OK   EA prices (Aug 2026)
+OK   EA jobs (Aug 2026)
+OK   EA growth (Q2 2026)
+OK   EA rate (Sep 2026)
+OK   EA compass (Q2 2026)
+OK   GB prices (Aug 2026)
+KEPT GB jobs: new fetch failed (FRED LRHUTTTTGBM156S returned no data); showing previous value
+KEPT GB growth: new fetch failed (FRED NAEXKP01GBQ657S returned no data); showing previous value
+OK   GB rate (Sep 2026)
+FAIL GB compass: needs this run's inflation, unemployment and growth data
+OK   JP prices (Jul 2026)
+KEPT JP jobs: new fetch failed (FRED LRHUTTTTJPM156S returned no data); showing previous value
+KEPT JP growth: new fetch failed (FRED NAEXKP01JPQ657S returned no data); showing previous value
+OK   JP rate (Sep 2026)
+FAIL JP compass: needs this run's inflation, unemployment and growth data
+OK   CH prices (Aug 2026)
+KEPT CH jobs: new fetch failed (FRED LRHUTTTTCHQ156S returned no data); showing previous value
+KEPT CH growth: new fetch failed (FRED NAEXKP01CHQ657S returned no data); showing previous value
+OK   CH rate (Sep 2026)
+FAIL CH compass: needs this run's inflation, unemployment and growth data
+OK   CA prices (Aug 2026)
+KEPT CA jobs: new fetch failed (FRED LRHUTTTTCAM156S returned no data); showing previous value
+KEPT CA growth: new fetch failed (FRED NAEXKP01CAQ657S returned no data); showing previous value
+OK   CA rate (Sep 2026)
+FAIL CA compass: needs this run's inflation, unemployment and growth data
+OK   AU prices (Jun 2026)
+KEPT AU jobs: new fetch failed (FRED LRHUTTTTAUM156S returned no data); showing previous value
+KEPT AU growth: new fetch failed (FRED NAEXKP01AUQ657S returned no data); showing previous value
+OK   AU rate (Sep 2026)
+FAIL AU compass: needs this run's inflation, unemployment and growth data
+OK   NZ prices (Jun 2026)
+KEPT NZ jobs: new fetch failed (FRED LRHUTTTTNZQ156S returned no data); showing previous value
+KEPT NZ growth: new fetch failed (FRED NAEXKP01NZQ657S returned no data); showing previous value
+OK   NZ rate (Sep 2026)
+FAIL NZ compass: needs this run's inflation, unemployment and growth data
+OK   NO prices (Aug 2026)
+KEPT NO jobs: new fetch failed (FRED LRHUTTTTNOM156S returned no data); showing previous value
+KEPT NO growth: new fetch failed (FRED NAEXKP01NOQ657S returned no data); showing previous value
+OK   NO rate (Sep 2026)
+FAIL NO compass: needs this run's inflation, unemployment and growth data
+OK   SE prices (Aug 2026)
+KEPT SE jobs: new fetch failed (FRED LRHUTTTTSEM156S returned no data); showing previous value
+KEPT SE growth: new fetch failed (FRED NAEXKP01SEQ657S returned no data); showing previous value
+OK   SE rate (Sep 2026)
+FAIL SE compass: needs this run's inflation, unemployment and growth data
+
+Wrote /home/runner/work/economy-thermometer/economy-thermometer/data.json
+::error::No data at all for: US compass, GB compass, JP compass, CH compass, CA compass, AU compass, NZ compass, NO compass, SE compass
