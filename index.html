@@ -231,13 +231,14 @@ function niceStep(span){var raw=span/6,p=Math.pow(10,Math.floor(Math.log10(raw))
 function p95(a){a=a.slice().sort(function(x,y){return x-y});return a.length?a[Math.min(a.length-1,Math.floor(a.length*.95))]:0}
 function quad(dx,dy,un){if(un)dx=-dx;return dy>=0?(dx>=0?"overheating":"stagflation"):(dx>=0?"sweet spot":"slowdown")}
 function moved(a,b,up,down,flat){var d=b-a;return Math.abs(d)<.3?flat+" around "+f1(b)+"%":(d>0?up:down)+" from "+f1(a)+"% to "+f1(b)+"%"}
-function story(c,v,pts,un){
+function story(c,v,pts,un,current){
+ var nm={US:"the US",GB:"the UK",EA:"the eurozone"}[c.code]||esc(c.name);
  var first=pts[0],last=pts[pts.length-1],peak=pts.reduce(function(m,p){return p[2]>m[2]?p:m},first);
  var back=v.freq==="M"?12:4,ago=pts.length>back?pts[pts.length-1-back]:first;
- var s="Since "+first[0]+", inflation in "+(c.code==="US"||c.code==="GB"?"the ":"")+esc(c.name)+" peaked at "+f1(peak[2])+"% in "+peak[0]+". ";
- s+="Over the last year inflation has "+moved(ago[2],last[2],"risen","fallen","held")+", while "+(un?"unemployment has "+moved(ago[1],last[1],"risen","fallen","held"):"growth has "+moved(ago[1],last[1],"picked up","slowed","held"))+". ";
- var dx=last[1]-v.x_center,dy=last[2]-c.compass.infl_center;
- s+=(Math.abs(dy)<.5&&Math.abs(dx)<(un?.3:.5))?"That leaves it close to the centre of the chart, near balance.":"That puts it in the "+quad(dx,dy,un)+" corner.";
+ var s=(current?"Since "+first[0]:"From "+first[0]+" to "+last[0])+", inflation in "+nm+" peaked at "+f1(peak[2])+"% in "+peak[0]+". ";
+ s+=(current?"Over the last year":"In the final year")+" inflation "+(current?"has ":"")+moved(ago[2],last[2],current?"risen":"rose",current?"fallen":"fell",current?"held":"held")+", while "+(un?"unemployment "+(current?"has ":"")+moved(ago[1],last[1],current?"risen":"rose",current?"fallen":"fell","held"):"growth "+(current?"has ":"")+moved(ago[1],last[1],current?"picked up":"picked up",current?"slowed":"slowed","held"))+". ";
+ var dx=last[1]-v.x_center,dy=last[2]-c.compass.infl_center,near=Math.abs(dy)<1&&Math.abs(dx)<(un?.5:1);
+ s+=(Math.abs(dy)<.5&&Math.abs(dx)<(un?.3:.5))?(current?"That leaves it":"It ended")+" close to the centre of the chart, near balance.":(current?(near?"That has it edging towards the ":"That puts it in the "):(near?"It ended edging towards the ":"It ended in the "))+quad(dx,dy,un)+" corner.";
  return s}
 function cyclePts(v,i){var cy=v.cycles[i];return v.pts.slice(cy.from,cy.to+1)}
 function compassChart(c,v,un){
@@ -287,7 +288,7 @@ function renderTime(){var c=D.countries[sel],el=$("v-time");
  if(quarterly)defs+=" "+esc(c.name)+" only publishes "+(c.code==="CH"?"unemployment":c.code==="AU"?"inflation":"inflation and unemployment")+" quarterly, so this view has one dot per quarter.";
  defs+=" Ringed dots are recessions ("+(c.compass.rec_rule==="nber"?"official NBER dates":"two or more quarters in a row of falling GDP")+"). Hollow dots are off the scale.";
  el.innerHTML='<div class="cmp"><div class="side"><div class="box"><p class="lbl">Economy</p>'+chips+'</div>'+
-  '<div class="box"><p class="lbl">'+esc(c.short)+" · "+(all?"since "+esc(pts[0][0]):CV.cyc===v.cycles.length-1?"current cycle, since "+esc(pts[0][0]):esc(pts[0][0])+" to "+esc(pts[pts.length-1][0]))+'</p><p class="story">'+story(c,v,pts,un)+'</p></div>'+
+  '<div class="box"><p class="lbl">'+esc(c.short)+" · "+(all?"since "+esc(pts[0][0]):CV.cyc===v.cycles.length-1?"current cycle, since "+esc(pts[0][0]):esc(pts[0][0])+" to "+esc(pts[pts.length-1][0]))+'</p><p class="story">'+story(c,v,pts,un,all||CV.cyc===v.cycles.length-1)+'</p></div>'+
   '<div class="box opts"><p class="lbl">Compare inflation with</p><div class="chips" id="cmode"><button type="button" data-m="growth" class="'+(un?"":"on")+'" aria-pressed="'+!un+'">GDP growth</button><button type="button" data-m="unemp" class="'+(un?"on":"")+'" aria-pressed="'+un+'">Unemployment</button></div>'+
   '<p class="lbl" style="margin-top:14px">Show</p><div class="chips" id="ccyc">'+cyc+'</div><p class="defs">One dot per '+(v.freq==="M"?"month":"quarter")+'. Arrows show the direction of travel.'+(all?"":" The faint line is the previous cycle, for comparison.")+'</p></div></div>'+
   '<div class="chart"><p class="yl">↑ Higher inflation</p><div id="cchart"><svg></svg></div><div class="xl"><span>← '+(un?"Lower unemployment":"Weaker growth")+'</span><span>'+(un?"Higher unemployment":"Stronger growth")+' →</span></div><p class="defs">'+defs+"</p></div></div>";

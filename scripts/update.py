@@ -444,7 +444,8 @@ def main():
                     log.append("KEPT %s %s: new fetch failed (%s); showing previous value" % (code, name, e))
                 else:
                     log.append("FAIL %s %s: %s" % (code, name, e))
-                    problems.append("%s %s" % (code, name))
+                    if name != "compass":  # the history view is extra; never fail the daily run over it
+                        problems.append("%s %s" % (code, name))
 
         def prices():
             if c["bis"] not in cpi_all:
