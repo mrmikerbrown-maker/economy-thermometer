@@ -12,22 +12,28 @@ permissions:
 jobs:
   check:
     runs-on: ubuntu-latest
-    timeout-minutes: 30
+    timeout-minutes: 40
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
         with:
           python-version: "3.12"
-      - run: python _check/check_history.py
       - name: Run the real daily job (result kept out of data.json)
+        timeout-minutes: 12
+        continue-on-error: true
         run: |
-          python scripts/update.py || true
+          python scripts/update.py | tee _check/job-log.txt || true
           cp data.json _check/data.json
           git checkout data.json
-      - name: Save report to the branch
+      - name: Check how far back each source goes
+        timeout-minutes: 15
+        continue-on-error: true
+        run: python _check/check_history.py
+      - name: Save results to the branch
+        if: always()
         run: |
           git config user.name "github-actions"
           git config user.email "github-actions@users.noreply.github.com"
-          git add _check/report.txt _check/data.json
+          git add -f _check/report.txt _check/data.json _check/job-log.txt || true
           git commit -m "Compass data check report [skip ci]" || exit 0
           git push

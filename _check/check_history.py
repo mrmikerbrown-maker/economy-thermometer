@@ -37,13 +37,21 @@ def summary(name, s):
 
 
 lines = []
+REPORT = open("_check/report.txt", "w")
+
+
+def note(line):
+    lines.append(line)
+    REPORT.write(line + "\n")
+    REPORT.flush()
+    print(line, flush=True)
 
 
 def run(name, fn):
     try:
-        lines.append(summary(name, fn()))
+        note(summary(name, fn()))
     except Exception as e:
-        lines.append("%-34s FAIL %s" % (name, e))
+        note("%-34s FAIL %s" % (name, e))
 
 
 areas = "+".join(c["bis"] for c in CFG["countries"])
@@ -53,9 +61,9 @@ try:
     for r in csv.DictReader(io.StringIO(text)):
         cpi.setdefault(r["REF_AREA"], []).append((r["TIME_PERIOD"][:7], r["OBS_VALUE"]))
     for c in CFG["countries"]:
-        lines.append(summary("CPI index %s (BIS)" % c["code"], sorted(cpi.get(c["bis"], []))))
+        note(summary("CPI index %s (BIS)" % c["code"], sorted(cpi.get(c["bis"], []))))
 except Exception as e:
-    lines.append("CPI BIS FAIL %s" % e)
+    note("CPI BIS FAIL %s" % e)
 
 run("USREC (NBER)", lambda: fred("USREC"))
 run("GDP US GDPC1", lambda: fred("GDPC1"))
@@ -76,5 +84,4 @@ for c in CFG["countries"]:
         run("GDP yoy %s 659S" % cc, lambda: fred("NAEXKP01%sQ659S" % cc))
         run("GDP level %s 652S" % cc, lambda: fred("NAEXKP01%sQ652S" % cc))
 
-print("\n".join(lines))
-open("_check/report.txt", "w").write("\n".join(lines) + "\n")
+REPORT.close()
