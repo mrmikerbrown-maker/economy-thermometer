@@ -1,4 +1,5 @@
 """Temporary: report how far back each compass series goes, as fetched from GitHub Actions."""
+# re-run 2026-10-22
 import csv, io, json, sys, time
 from urllib.request import Request, urlopen
 
