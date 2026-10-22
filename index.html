@@ -224,7 +224,9 @@ function showReading(e){var point=e.target.closest(".trend-point");if(point)poin
 $("dt").addEventListener("click",showReading);
 $("dt").addEventListener("focusin",showReading);
 /* Over time: the economic compass. Inflation (up) against growth or unemployment (across), one trail per business cycle. */
-var CV={mode:"growth",cyc:null,tab:"now"};
+var CV={mode:"growth",cs:null,tab:"now"};
+var CCOL=["#00E0FF","#B08CFF","#FFB547","#5E8BFF","#FF7AC6","#8A8FA3"];
+function cycCol(v,i){return CCOL[Math.min(v.cycles.length-1-i,CCOL.length-1)]}
 var MON=["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
 function quarterSpan(k){var m=k.match(/^Q([1-4]) (\d{4})$/);if(!m)return k;var q=+m[1];return k+" ("+MON[q*3-3]+"–"+MON[q*3-1]+")"}
 function niceStep(span){var raw=span/6,p=Math.pow(10,Math.floor(Math.log10(raw))),f=raw/p;return (f<=1?1:f<=2?2:f<=2.5?2.5:f<=5?5:10)*p}
@@ -243,12 +245,13 @@ function story(c,v,pts,un,current){
 function cyclePts(v,i){var cy=v.cycles[i];return v.pts.slice(cy.from,cy.to+1)}
 function compassChart(c,v,un){
  var box=$("cchart"),Wd=Math.max(300,Math.min(680,box.clientWidth||600)),Ht=Math.round(Wd*(Wd<480?1.02:.9));
- var all=CV.cyc==="all",ci=all?v.cycles.length-1:CV.cyc,pts=all?v.pts:cyclePts(v,ci),prev=(!all&&ci>0)?cyclePts(v,ci-1):[];
+ var last=v.cycles.length-1,G=CV.cs.map(function(i){return {i:i,pts:cyclePts(v,i),col:cycCol(v,i),cur:i===last}}),pts=[].concat.apply([],G.map(function(g){return g.pts}));
+ var prev=(G.length===1&&G[0].i>0)?cyclePts(v,G[0].i-1):[];
  var xc=v.x_center,yc=c.compass.infl_center;
  var hx=Math.max(un?1.5:2,p95(pts.map(function(p){return Math.abs(p[1]-xc)}))*1.2),hy=Math.max(3,p95(pts.map(function(p){return Math.abs(p[2]-yc)}))*1.2);
  var M=8,X=function(x){return Wd/2+(x-xc)/hx*(Wd/2-M)},Y=function(y){return Ht/2-(y-yc)/hy*(Ht/2-M)};
  function P(p){var cx=X(p[1]),cy=Y(p[2]),off=cx<M||cx>Wd-M||cy<M||cy>Ht-M;return [Math.max(M,Math.min(Wd-M,cx)),Math.max(M,Math.min(Ht-M,cy)),off]}
- var s='<defs><marker id="ar" viewBox="0 0 10 10" refX="5" refY="5" markerWidth="5" markerHeight="5" orient="auto"><path d="M0,0 L10,5 L0,10 z" fill="#00E0FF"/></marker></defs>';
+ var s='<defs>'+G.map(function(g){return '<marker id="ar'+g.i+'" viewBox="0 0 10 10" refX="5" refY="5" markerWidth="5" markerHeight="5" orient="auto"><path d="M0,0 L10,5 L0,10 z" fill="'+g.col+'"/></marker>'}).join("")+'</defs>';
  var hot="rgba(255,59,107,.16)",warm="rgba(255,59,107,.08)",cool="rgba(0,224,255,.12)",calm="rgba(0,224,255,.05)";
  var Q=un?[["OVERHEATING",hot,0,0,"start"],["STAGFLATION",warm,1,0,"end"],["SWEET SPOT",calm,0,1,"start"],["SLOWDOWN",cool,1,1,"end"]]:[["STAGFLATION",warm,0,0,"start"],["OVERHEATING",hot,1,0,"end"],["SLOWDOWN",cool,0,1,"start"],["SWEET SPOT",calm,1,1,"end"]];
  Q.forEach(function(q){s+='<rect x="'+(q[2]*Wd/2)+'" y="'+(q[3]*Ht/2)+'" width="'+Wd/2+'" height="'+Ht/2+'" fill="'+q[1]+'"/><text class="c-q" x="'+(q[2]?Wd-10:10)+'" y="'+(q[3]?Ht-10:20)+'" text-anchor="'+q[4]+'">'+q[0]+'</text>'});
@@ -256,19 +259,22 @@ function compassChart(c,v,un){
  st=niceStep(2*hx);for(t=Math.ceil((xc-hx)/st)*st;t<=xc+hx;t+=st){var x=X(t);if(x>34&&x<Wd-34)s+='<line y1="0" y2="'+Ht+'" x1="'+x+'" x2="'+x+'" stroke="#fff" stroke-opacity=".05"/><text class="c-t" x="'+x+'" y="'+(Ht-28)+'" text-anchor="middle">'+(+t.toFixed(1))+'%</text>'}
  s+='<line x1="'+Wd/2+'" x2="'+Wd/2+'" y1="0" y2="'+Ht+'" stroke="#2a2d3a"/><line y1="'+Ht/2+'" y2="'+Ht/2+'" x1="0" x2="'+Wd+'" stroke="#2a2d3a"/>';
  if(prev.length)s+='<clipPath id="cclip"><rect width="'+Wd+'" height="'+Ht+'"/></clipPath><path clip-path="url(#cclip)" d="'+prev.map(function(p,i){return (i?"L":"M")+X(p[1]).toFixed(1)+","+Y(p[2]).toFixed(1)}).join(" ")+'" fill="none" stroke="#B08CFF" stroke-width="1.3" opacity=".25"/>';
- var n=pts.length,PP=pts.map(P),every=v.freq==="M"?3:1,dots="",hits="";
- for(var i=1;i<n;i++){var a=PP[i-1],b=PP[i],op=(.3+.7*i/n).toFixed(2),cyc=all?v.cycles.findIndex(function(cy){return i<=cy.to}):-1,col=all&&cyc<v.cycles.length-1?["#8A8FA3","#B08CFF","#5E8BFF","#C9A2FF"][cyc%4]:"#00E0FF";
-  var long=Math.hypot(b[0]-a[0],b[1]-a[1])>26&&i%every===0;
-  s+='<path d="M'+a[0].toFixed(1)+","+a[1].toFixed(1)+" L"+((a[0]+b[0])/2).toFixed(1)+","+((a[1]+b[1])/2).toFixed(1)+" L"+b[0].toFixed(1)+","+b[1].toFixed(1)+'" fill="none" stroke="'+col+'" stroke-width="2.2" opacity="'+op+'" stroke-linejoin="round"'+(long&&col==="#00E0FF"?' marker-mid="url(#ar)"':"")+"/>"}
- pts.forEach(function(p,i){var q=PP[i],o=(.35+.65*i/n).toFixed(2);
-  if(p[3])dots+='<circle cx="'+q[0]+'" cy="'+q[1]+'" r="5.5" fill="none" stroke="#FF3B6B" stroke-width="1.6" opacity="'+o+'"/>';
-  if(i>0&&i<n-1)dots+=q[2]?'<circle cx="'+q[0]+'" cy="'+q[1]+'" r="3.5" fill="#06060A" stroke="#00E0FF" stroke-width="1.5" opacity="'+o+'"/>':'<circle cx="'+q[0]+'" cy="'+q[1]+'" r="'+(v.freq==="M"?1.8:2.4)+'" fill="#00E0FF" opacity="'+o+'"/>';
-  hits+='<circle class="hit" tabindex="0" data-i="'+i+'" cx="'+q[0]+'" cy="'+q[1]+'" r="'+(v.freq==="M"?7:10)+'" aria-label="'+esc(p[0])+'"/>'});
- var a0=PP[0],z=PP[n-1],right=a0[0]>Wd-170;
- dots+='<circle cx="'+a0[0]+'" cy="'+a0[1]+'" r="6" fill="#06060A" stroke="#FF3B6B" stroke-width="2.5"/><text class="c-a" x="'+(right?a0[0]-10:a0[0]+10)+'" y="'+(a0[1]+(a0[1]>Ht-60?-12:20))+'" text-anchor="'+(right?"end":"start")+'"><tspan fill="#FF3B6B" font-weight="700">START</tspan> '+esc(pts[0][0])+'</text>';
- dots+='<circle cx="'+z[0]+'" cy="'+z[1]+'" r="12" fill="none" stroke="#fff" opacity=".35"/><circle cx="'+z[0]+'" cy="'+z[1]+'" r="7" fill="#fff"/><text class="c-s" x="'+(z[0]<60?z[0]+16:z[0]-16)+'" y="'+(z[1]+4)+'" text-anchor="'+(z[0]<60?"start":"end")+'">NOW</text>';
- box.innerHTML='<svg viewBox="0 0 '+Wd+" "+Ht+'" width="'+Wd+'" height="'+Ht+'" role="img" aria-label="'+esc(c.name)+' inflation against '+(un?"unemployment":"growth")+'">'+s+dots+hits+'</svg><div class="tip" id="ctip"></div>';
- box._pts=pts;box._PP=PP;box._un=un;box._W=Wd}
+ var every=v.freq==="M"?3:1,dots="",hits="",marks="",AP=[],APP=[],few=G.length<=3&&G.length<v.cycles.length;
+ function lbl(q,word,date,col,below){var right=q[0]>Wd-170;return '<text class="c-a" x="'+(right?q[0]-12:q[0]+12)+'" y="'+Math.max(34,Math.min(Ht-50,q[1]+(below?(q[1]>Ht-60?-14:22):(q[1]<40?22:-12))))+'" text-anchor="'+(right?"end":"start")+'"><tspan fill="'+col+'" font-weight="700">'+word+'</tspan> '+esc(date)+'</text>'}
+ G.forEach(function(g,gi){var gp=g.pts,n=gp.length,PP=gp.map(P);
+  for(var i=1;i<n;i++){var a=PP[i-1],b=PP[i],op=(.3+.7*i/n).toFixed(2),long=Math.hypot(b[0]-a[0],b[1]-a[1])>26&&i%every===0;
+   s+='<path d="M'+a[0].toFixed(1)+","+a[1].toFixed(1)+" L"+((a[0]+b[0])/2).toFixed(1)+","+((a[1]+b[1])/2).toFixed(1)+" L"+b[0].toFixed(1)+","+b[1].toFixed(1)+'" fill="none" stroke="'+g.col+'" stroke-width="2.2" opacity="'+op+'" stroke-linejoin="round"'+(long?' marker-mid="url(#ar'+g.i+')"':"")+"/>"}
+  gp.forEach(function(p,i){var q=PP[i],o=(.35+.65*i/n).toFixed(2);
+   if(p[3])dots+='<circle cx="'+q[0]+'" cy="'+q[1]+'" r="5.5" fill="none" stroke="#FF3B6B" stroke-width="1.6" opacity="'+o+'"/>';
+   if(i>0&&i<n-1)dots+=q[2]?'<circle cx="'+q[0]+'" cy="'+q[1]+'" r="3.5" fill="#06060A" stroke="'+g.col+'" stroke-width="1.5" opacity="'+o+'"/>':'<circle cx="'+q[0]+'" cy="'+q[1]+'" r="'+(v.freq==="M"?1.8:2.4)+'" fill="'+g.col+'" opacity="'+o+'"/>';
+   hits+='<circle class="hit" tabindex="0" data-i="'+AP.length+'" cx="'+q[0]+'" cy="'+q[1]+'" r="'+(v.freq==="M"?7:10)+'" aria-label="'+esc(p[0])+'"/>';AP.push(p);APP.push(q)});
+  var a0=PP[0],z=PP[n-1],joined=gi>0&&G[gi-1].i===g.i-1,showS=few?!joined:gi===0,showE=few||gi===G.length-1;
+  if(!joined)marks+='<circle cx="'+a0[0]+'" cy="'+a0[1]+'" r="6" fill="#06060A" stroke="#FF3B6B" stroke-width="2.5"/>';
+  if(showS)marks+=lbl(a0,"START",gp[0][0],"#FF3B6B",true);
+  if(g.cur)marks+='<circle cx="'+z[0]+'" cy="'+z[1]+'" r="12" fill="none" stroke="#fff" opacity=".35"/><circle cx="'+z[0]+'" cy="'+z[1]+'" r="7" fill="#fff"/><text class="c-s" x="'+(z[0]<60?z[0]+16:z[0]-16)+'" y="'+(z[1]+4)+'" text-anchor="'+(z[0]<60?"start":"end")+'">NOW</text>';
+  else{marks+='<circle cx="'+z[0]+'" cy="'+z[1]+'" r="10" fill="none" stroke="'+g.col+'" opacity=".45"/><circle cx="'+z[0]+'" cy="'+z[1]+'" r="6" fill="'+g.col+'"/>';if(showE)marks+=lbl(z,"END",gp[n-1][0],"#fff",false)}});
+ box.innerHTML='<svg viewBox="0 0 '+Wd+" "+Ht+'" width="'+Wd+'" height="'+Ht+'" role="img" aria-label="'+esc(c.name)+' inflation against '+(un?"unemployment":"growth")+'">'+s+dots+marks+hits+'</svg><div class="tip" id="ctip"></div>';
+ box._pts=AP;box._PP=APP;box._un=un;box._W=Wd}
 function tipShow(e){var h=e.target.closest&&e.target.closest(".hit");var box=$("cchart"),tip=$("ctip");if(!h||!tip){if(tip)tip.style.display="none";return}
  var i=+h.getAttribute("data-i"),p=box._pts[i],q=box._PP[i],un=box._un,c=D.countries[sel];
  tip.innerHTML="<b>"+esc(un&&c.compass.unemp.freq==="M"?p[0]:quarterSpan(p[0]))+"</b>Inflation (CPI YoY"+(c.compass[un?"unemp":"growth"].freq==="Q"?", quarter avg":"")+"): "+f1(p[2])+"%<br>"+(un?"Unemployment: ":"GDP growth (YoY): ")+f1(p[1])+"%"+(p[3]?"<br>Recession":"")+(q[2]?"<br>Off the chart":"");
@@ -279,18 +285,20 @@ function renderTime(){var c=D.countries[sel],el=$("v-time");
  var chips='<div class="chips" role="group" aria-label="Economy">'+D.countries.map(function(x,i){return '<button type="button" data-c="'+i+'" class="'+(i===sel?"on":"")+'" aria-pressed="'+(i===sel)+'">'+esc(x.short)+"</button>"}).join("")+"</div>";
  if(!c.compass){el.innerHTML='<div class="cmp"><div class="side"><div class="box"><p class="lbl">Economy</p>'+chips+'</div></div><p class="empty">No history for '+esc(c.name)+' yet. It appears after the next daily update.</p></div>';return}
  var un=CV.mode==="unemp",v=c.compass[un?"unemp":"growth"];
- if(CV.cyc===null||CV.cyc!=="all"&&CV.cyc>=v.cycles.length)CV.cyc=v.cycles.length-1;
- var all=CV.cyc==="all",pts=all?v.pts:cyclePts(v,CV.cyc);
- var cyc=v.cycles.map(function(cy,i){var cur=i===v.cycles.length-1;return '<button type="button" data-y="'+i+'" class="'+(CV.cyc===i?"on":"")+'" aria-pressed="'+(CV.cyc===i)+'">'+(cur?"This cycle":cy.label)+"</button>"}).reverse().join("")+'<button type="button" data-y="all" class="'+(all?"on":"")+'" aria-pressed="'+all+'">All '+Math.round(v.pts.length/(v.freq==="M"?12:4))+" years</button>";
+ var last=v.cycles.length-1;
+ if(!CV.cs||CV.cs.some(function(i){return i>last}))CV.cs=[last];
+ var all=CV.cs.length===v.cycles.length,top=CV.cs[CV.cs.length-1],cur=all||top===last,pts=all?v.pts:cyclePts(v,top);
+ var cyc=v.cycles.map(function(cy,i){var on=CV.cs.indexOf(i)>=0,col=cycCol(v,i);return '<button type="button" data-y="'+i+'" class="'+(on?"on":"")+'" aria-pressed="'+on+'"'+(on?' style="border-color:'+col+';color:'+col+'"':"")+'>'+(i===last?"This cycle":cy.label)+"</button>"}).reverse().join("")+'<button type="button" data-y="all" class="'+(all?"on":"")+'" aria-pressed="'+all+'">All '+Math.round(v.pts.length/(v.freq==="M"?12:4))+" years</button>";
+ var also=all?[]:CV.cs.filter(function(i){return i!==top}).map(function(i){return v.cycles[i].label});
  var tgt=c.compass.infl_center,quarterly=un&&v.freq==="Q";
  var defs=un?"<b>Across:</b> unemployment rate, "+(quarterly?"quarterly":"monthly")+", against its 10-year median of "+f1(v.x_center)+"%. <b>Up:</b> CPI inflation, year on year"+(quarterly?", averaged over each quarter":", monthly")+", against the "+esc(c.compass.target)+" target"+(c.compass.target.indexOf("to")>0?" (midpoint "+f1(tgt)+"%)":"")+"."
   :"<b>Across:</b> real GDP growth, year on year, against its 10-year median of "+f1(v.x_center)+"%. <b>Up:</b> CPI inflation, year on year, averaged over the three months of each quarter to match quarterly GDP, against the "+esc(c.compass.target)+" target"+(c.compass.target.indexOf("to")>0?" (midpoint "+f1(tgt)+"%)":"")+".";
  if(quarterly)defs+=" "+esc(c.name)+" only publishes "+(c.code==="CH"?"unemployment":c.code==="AU"?"inflation":"inflation and unemployment")+" quarterly, so this view has one dot per quarter.";
  defs+=" Ringed dots are recessions ("+(c.compass.rec_rule==="nber"?"official NBER dates":"two or more quarters in a row of falling GDP")+"). Hollow dots are off the scale.";
  el.innerHTML='<div class="cmp"><div class="side"><div class="box"><p class="lbl">Economy</p>'+chips+'</div>'+
-  '<div class="box"><p class="lbl">'+esc(c.short)+" · "+(all?"since "+esc(pts[0][0]):CV.cyc===v.cycles.length-1?"current cycle, since "+esc(pts[0][0]):esc(pts[0][0])+" to "+esc(pts[pts.length-1][0]))+'</p><p class="story">'+story(c,v,pts,un,all||CV.cyc===v.cycles.length-1)+'</p></div>'+
+  '<div class="box"><p class="lbl">'+esc(c.short)+" · "+(all?"since "+esc(pts[0][0]):top===last?"current cycle, since "+esc(pts[0][0]):esc(pts[0][0])+" to "+esc(pts[pts.length-1][0]))+'</p><p class="story">'+story(c,v,pts,un,cur)+'</p>'+(also.length?'<p class="defs">Also on the chart: '+also.join(", ")+".</p>":"")+'</div>'+
   '<div class="box opts"><p class="lbl">Compare inflation with</p><div class="chips" id="cmode"><button type="button" data-m="growth" class="'+(un?"":"on")+'" aria-pressed="'+!un+'">GDP growth</button><button type="button" data-m="unemp" class="'+(un?"on":"")+'" aria-pressed="'+un+'">Unemployment</button></div>'+
-  '<p class="lbl" style="margin-top:14px">Show</p><div class="chips" id="ccyc">'+cyc+'</div><p class="defs">One dot per '+(v.freq==="M"?"month":"quarter")+'. Arrows show the direction of travel.'+(all?"":" The faint line is the previous cycle, for comparison.")+'</p></div></div>'+
+  '<p class="lbl" style="margin-top:14px">Show</p><div class="chips" id="ccyc">'+cyc+'</div><p class="defs">One dot per '+(v.freq==="M"?"month":"quarter")+'. Arrows show the direction of travel.'+(CV.cs.length===1?(top>0?" The faint line is the previous cycle, for comparison.":"")+" Tap more than one cycle to compare them.":" Colours match the buttons above.")+'</p></div></div>'+
   '<div class="chart"><p class="yl">↑ Higher inflation</p><div id="cchart"><svg></svg></div><div class="xl"><span>← '+(un?"Lower unemployment":"Weaker growth")+'</span><span>'+(un?"Higher unemployment":"Stronger growth")+' →</span></div><p class="defs">'+defs+"</p></div></div>";
  compassChart(c,v,un)}
 function setTab(t){CV.tab=t;var time=t==="time";$("v-now").hidden=time;$("v-time").hidden=!time;$("tab-now").className=time?"":"on";$("tab-time").className=time?"on":"";
@@ -300,9 +308,12 @@ function setTab(t){CV.tab=t;var time=t==="time";$("v-now").hidden=time;$("v-time
 $("tab-now").addEventListener("click",function(){setTab("now")});
 $("tab-time").addEventListener("click",function(){setTab("time")});
 $("v-time").addEventListener("click",function(e){var b=e.target.closest("button");
- if(b&&b.hasAttribute("data-c")){sel=+b.getAttribute("data-c");CV.cyc=null;renderTime()}
- else if(b&&b.hasAttribute("data-m")){CV.mode=b.getAttribute("data-m");CV.cyc=null;renderTime()}
- else if(b&&b.hasAttribute("data-y")){var y=b.getAttribute("data-y");CV.cyc=y==="all"?"all":+y;renderTime()}
+ if(b&&b.hasAttribute("data-c")){sel=+b.getAttribute("data-c");CV.cs=null;renderTime()}
+ else if(b&&b.hasAttribute("data-m")){CV.mode=b.getAttribute("data-m");CV.cs=null;renderTime()}
+ else if(b&&b.hasAttribute("data-y")){var y=b.getAttribute("data-y"),v=D.countries[sel].compass[CV.mode==="unemp"?"unemp":"growth"],n=v.cycles.length;
+  if(y==="all")CV.cs=CV.cs.length===n?[n-1]:v.cycles.map(function(_,i){return i});
+  else{y=+y;var k=CV.cs.indexOf(y);if(k<0)CV.cs=CV.cs.concat([y]).sort(function(p,q){return p-q});else if(CV.cs.length>1)CV.cs=CV.cs.filter(function(i){return i!==y})}
+  renderTime()}
  else tipShow(e)});
 $("v-time").addEventListener("mouseover",tipShow);
 $("v-time").addEventListener("focusin",tipShow);
