@@ -49,7 +49,11 @@ def fred(url, today):
     r = rng(sid)
     start_y = int(re.search(r"cosd=(\d{4})", url).group(1))
     rows = ["observation_date,%s" % sid]
-    if sid == "GDPC1":
+    if sid == "USREC":
+        ey, em = lag(today, 1)
+        for y, m in months_between(start_y, 1, ey, em):
+            rows.append("%d-%02d-01,%d" % (y, m, 1 if (2008, 1) <= (y, m) <= (2009, 6) or (2020, 3) <= (y, m) <= (2020, 4) else 0))
+    elif sid == "GDPC1":
         lvl, (ey, em) = 100.0, lag(today, 4)
         for y, m in months_between(start_y, 1, ey, em):
             if m in (1, 4, 7, 10):
@@ -120,13 +124,17 @@ def jsonstat(periods, vals):
                        "value": {str(i): v for i, v in enumerate(vals) if v is not None}})
 
 
+def since_year(url):
+    return int(re.search(r"sinceTimePeriod=(\d{4})", url).group(1))
+
+
 def eurostat_une(url, today):
     geo = re.search(r"geo=([A-Z0-9]+)", url).group(1)
     ey, em = lag(today, 2)
     ps, vs = [], []
     r = rng("eaune")
     u = 8.0
-    for y, m in months_between(today.year - 11, 1, ey, em):
+    for y, m in months_between(since_year(url), 1, ey, em):
         u += r.gauss(0, 0.06) - (u - 7) * 0.02
         ps.append("%d-%02d" % (y, m))
         vs.append(round(u, 1) if geo != "EA21" else None)  # EA21 empty on purpose: tests the fallback
@@ -137,7 +145,7 @@ def eurostat_gdp(url, today):
     ey, em = lag(today, 4)
     ps, vs = [], []
     r = rng("eagdp")
-    for y, m in months_between(today.year - 11, 1, ey, em):
+    for y, m in months_between(since_year(url), 1, ey, em):
         if m in (1, 4, 7, 10):
             ps.append("%d-Q%d" % (y, (m - 1) // 3 + 1))
             vs.append(round(r.gauss(0.35, 0.3), 1))

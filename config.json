@@ -169,7 +169,8 @@
         "id": "NAEXKP01AUQ657S",
         "freq": "Q"
       },
-      "bank_short": "RBA"
+      "bank_short": "RBA",
+      "cpi_freq": "Q"
     },
     {
       "code": "NZ",
@@ -192,7 +193,8 @@
         "id": "NAEXKP01NZQ657S",
         "freq": "Q"
       },
-      "bank_short": "RBNZ"
+      "bank_short": "RBNZ",
+      "cpi_freq": "Q"
     },
     {
       "code": "NO",
@@ -240,5 +242,6 @@
       },
       "bank_short": "Riksbank"
     }
-  ]
+  ],
+  "compass_years": 20
 }

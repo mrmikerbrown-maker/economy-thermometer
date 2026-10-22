@@ -88,6 +88,34 @@ h1{font-size:clamp(22px,4.4vw,30px);line-height:1.15;margin:0 0 8px;color:var(--
 .empty{color:var(--muted);font-size:14px;padding:6px 0}
 .note{font-size:12px;color:var(--muted);margin:14px 0 0;max-width:72ch}.note p{margin:0 0 8px}.note summary{cursor:pointer;color:var(--accent);display:inline-block}.note ul{margin:8px 0 0;padding-left:18px;display:flex;flex-direction:column;gap:8px}.note b{color:var(--text2);font-weight:600}
 .cta{display:inline-block;margin-top:18px;color:var(--accent);font-weight:700;text-decoration:none}.cta:hover{text-decoration:underline}
+/* over time: the compass */
+.wrap.wide{max-width:1100px}
+.tabs{display:inline-flex;background:var(--bg);border:1px solid var(--line);border-radius:10px;padding:3px;margin:0 0 14px}
+.tabs button{appearance:none;font:inherit;font-size:14px;border:0;background:none;color:var(--muted);padding:7px 22px;border-radius:8px;cursor:pointer}
+.tabs button.on{background:var(--line);color:var(--text);font-weight:600}
+.tabs button:focus-visible{outline:2px solid var(--accent)}
+.cmp{display:grid;grid-template-columns:270px minmax(0,1fr);gap:16px;align-items:start}
+.cmp .side{display:flex;flex-direction:column;gap:12px}
+.box{border:1px solid var(--line);background:var(--bg);border-radius:10px;padding:12px}
+.chips{display:flex;flex-wrap:wrap;gap:6px}
+.chips button{appearance:none;font:inherit;font-size:13px;border:1px solid var(--line);background:none;color:var(--muted);border-radius:99px;padding:5px 11px;cursor:pointer}
+.chips button.on{border-color:var(--accent);color:var(--accent);font-weight:600}
+.chips button:focus-visible{outline:2px solid var(--text)}
+.story{font-size:15.5px;line-height:1.5;color:var(--text);margin:0}
+.chart{position:relative}
+.chart svg{display:block;width:100%;height:auto;border-radius:8px;touch-action:manipulation}
+.chart .yl{font-size:12px;color:var(--muted);margin:0 0 6px}
+.chart .xl{display:flex;justify-content:space-between;font-size:12px;color:var(--muted);margin-top:6px}
+.defs{font-size:12.5px;color:var(--muted);margin:10px 0 0;line-height:1.5}.defs b{color:var(--text2);font-weight:600}
+.tip{position:absolute;pointer-events:none;background:var(--text2);color:var(--bg);border-radius:8px;padding:8px 11px;font-size:12.5px;line-height:1.45;white-space:nowrap;box-shadow:0 4px 16px rgba(0,0,0,.5);z-index:6;display:none}
+.tip b{display:block;font-size:13px}
+.hit{fill:transparent;cursor:pointer;outline:none}
+.hit:focus-visible{stroke:var(--text);stroke-width:2}
+.c-q{font:700 11px ui-sans-serif,system-ui,sans-serif;letter-spacing:.08em;fill:var(--muted)}
+.c-t{font:11px ui-sans-serif,system-ui,sans-serif;fill:var(--muted)}
+.c-a{font:12px ui-sans-serif,system-ui,sans-serif;fill:var(--text2)}
+.c-s{font:700 13px ui-sans-serif,system-ui,sans-serif;fill:#fff}
+@media (max-width:760px){.cmp{grid-template-columns:minmax(0,1fr);gap:12px}.cmp .side{display:contents}.cmp .side>.box{order:1}.cmp .side>.box+.box{order:2}.cmp .chart{order:3}.cmp .side>.box.opts{order:4}}
 @media (max-width:560px){
  .card{padding:12px}.hd{grid-template-columns:minmax(0,1.3fr) repeat(3,minmax(0,.8fr));padding:0 8px 4px}.hd span:nth-child(n+5){display:none}
  .rw{grid-template-columns:minmax(0,1.3fr) repeat(3,minmax(0,.8fr));row-gap:6px;padding:8px}
@@ -101,11 +129,13 @@ h1{font-size:clamp(22px,4.4vw,30px);line-height:1.15;margin:0 0 8px;color:var(--
 <div class="wrap">
 <img class="logo" src="data:image/png;base64,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" alt="Newsquawk" width="150">
 <h1>Is the economy hot or cold?</h1>
-<p class="sub">Central banks raise interest rates when an economy runs hot and cut them when it runs cold. Here is where each major economy sits right now. Tap a country for the detail.</p>
+<p class="sub" id="sub">Central banks raise interest rates when an economy runs hot and cut them when it runs cold. Here is where each major economy sits right now. Tap a country for the detail.</p>
+<div class="tabs" role="tablist" aria-label="View"><button type="button" role="tab" id="tab-now" class="on" aria-selected="true">Today</button><button type="button" role="tab" id="tab-time" aria-selected="false">Over time</button></div>
 <div class="card">
 <div class="demo" id="demo">Example data: made-up numbers, only for checking the layout.</div>
-<div class="ov" id="ov" role="group" aria-label="Economies"></div>
-<div class="dt" id="dt" aria-live="polite"></div>
+<div id="v-now"><div class="ov" id="ov" role="group" aria-label="Economies"></div>
+<div class="dt" id="dt" aria-live="polite"></div></div>
+<div id="v-time" hidden></div>
 </div>
 <div class="note"><p id="upd"></p><details><summary>How to read this</summary><ul>
 <li><b>Hot, warm, in line, cool, cold:</b> prices are compared with the central bank's own inflation target. Unemployment and growth are compared with that country's last 10 years. If the latest reading falls within the middle half of those readings it is rated "in line", and the further outside it falls, the hotter or colder it is rated.</li>
@@ -114,6 +144,7 @@ h1{font-size:clamp(22px,4.4vw,30px);line-height:1.15;margin:0 0 8px;color:var(--
 <li><b>Targets used:</b> 2% for the US, euro area, UK, Japan, Norway and Sweden (within half a point of the target counts as in line), 1 to 3% for Canada and New Zealand, 2 to 3% for Australia and 0 to 2% for Switzerland. The Fed targets a slightly different measure of inflation (PCE) that usually runs a little lower than the CPI shown here.</li>
 <li><b>Timing:</b> each figure is the latest published, so the dates differ between countries and indicators. Some are a few months old. Unemployment follows the international survey-based definition, so the Swiss figure is higher than the registered rate quoted locally.</li>
 <li><b>Interest rate:</b> the central bank's main policy rate. For the US it is the upper end of the Fed's target range. "Usually" matters: central banks look at many things, and this is a summary, not a forecast. Not trading advice.</li>
+<li><b>Over time</b> plots inflation against either growth or unemployment, one dot per quarter (growth) or per month (unemployment). The trail runs from the start of the chosen business cycle to now, with arrows showing the direction of travel. The centre of the chart is the inflation target and the country's 10-year median for growth or unemployment. Growth there is year on year, not on the previous quarter, because quarterly figures jump around too much to draw a readable path. Ringed dots are recessions: the official NBER dates for the US and, elsewhere, two or more quarters in a row of falling GDP. Hollow dots are off the scale and pinned to the edge; hover or tap one for its real value.</li>
 <li><b>Sources:</b> Bank for International Settlements, OECD and national statistics offices via FRED, Eurostat and the US Bureau of Economic Analysis.</li></ul></details></div>
 <a class="cta" href="https://newsquawk.com">Take a 1-week trial → newsquawk.com</a>
 </div>
@@ -187,11 +218,96 @@ function render(){if(!D||!D.countries||!D.countries.length){$("ov").innerHTML='<
  $("demo").className="demo"+(D.demo?" on":"");
  if(D.generated){var d=new Date(D.generated);$("upd").textContent="Data checked "+d.toLocaleDateString("en-GB",{day:"numeric",month:"short",year:"numeric"})+". Each figure shows the date it refers to."}
  else $("upd").textContent="";
- overview();detail()}
+ if(CV.tab==="time")renderTime();else{overview();detail()}}
 $("ov").addEventListener("click",function(e){var b=e.target.closest(".rw");if(!b)return;sel=+b.getAttribute("data-i");overview();detail()});
 function showReading(e){var point=e.target.closest(".trend-point");if(point)point.closest(".trend").querySelector("output").textContent=point.getAttribute("data-reading")}
 $("dt").addEventListener("click",showReading);
 $("dt").addEventListener("focusin",showReading);
+/* Over time: the economic compass. Inflation (up) against growth or unemployment (across), one trail per business cycle. */
+var CV={mode:"growth",cyc:null,tab:"now"};
+var MON=["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
+function quarterSpan(k){var m=k.match(/^Q([1-4]) (\d{4})$/);if(!m)return k;var q=+m[1];return k+" ("+MON[q*3-3]+"–"+MON[q*3-1]+")"}
+function niceStep(span){var raw=span/6,p=Math.pow(10,Math.floor(Math.log10(raw))),f=raw/p;return (f<=1?1:f<=2?2:f<=2.5?2.5:f<=5?5:10)*p}
+function p95(a){a=a.slice().sort(function(x,y){return x-y});return a.length?a[Math.min(a.length-1,Math.floor(a.length*.95))]:0}
+function quad(dx,dy,un){if(un)dx=-dx;return dy>=0?(dx>=0?"overheating":"stagflation"):(dx>=0?"sweet spot":"slowdown")}
+function moved(a,b,up,down,flat){var d=b-a;return Math.abs(d)<.3?flat+" around "+f1(b)+"%":(d>0?up:down)+" from "+f1(a)+"% to "+f1(b)+"%"}
+function story(c,v,pts,un,current){
+ var nm={US:"the US",GB:"the UK",EA:"the eurozone"}[c.code]||esc(c.name);
+ var first=pts[0],last=pts[pts.length-1],peak=pts.reduce(function(m,p){return p[2]>m[2]?p:m},first);
+ var back=v.freq==="M"?12:4,ago=pts.length>back?pts[pts.length-1-back]:first;
+ var s=(current?"Since "+first[0]:"From "+first[0]+" to "+last[0])+(peak===first?", inflation in "+nm+(current?" has come":" came")+" down from a peak of "+f1(peak[2])+"%. ":", inflation in "+nm+" peaked at "+f1(peak[2])+"% in "+peak[0]+". ");
+ s+=(current?"Over the last year":"In the final year")+" inflation "+(current?"has ":"")+moved(ago[2],last[2],current?"risen":"rose",current?"fallen":"fell",current?"held":"held")+", while "+(un?"unemployment "+(current?"has ":"")+moved(ago[1],last[1],current?"risen":"rose",current?"fallen":"fell","held"):"growth "+(current?"has ":"")+moved(ago[1],last[1],current?"picked up":"picked up",current?"slowed":"slowed","held"))+". ";
+ var dx=last[1]-v.x_center,dy=last[2]-c.compass.infl_center,near=Math.abs(dy)<1&&Math.abs(dx)<(un?.5:1);
+ s+=(Math.abs(dy)<.5&&Math.abs(dx)<(un?.3:.5))?(current?"That leaves it":"It ended")+" close to the centre of the chart, near balance.":(current?(near?"That has it edging towards the ":"That puts it in the "):(near?"It ended edging towards the ":"It ended in the "))+quad(dx,dy,un)+" corner.";
+ return s}
+function cyclePts(v,i){var cy=v.cycles[i];return v.pts.slice(cy.from,cy.to+1)}
+function compassChart(c,v,un){
+ var box=$("cchart"),Wd=Math.max(300,Math.min(680,box.clientWidth||600)),Ht=Math.round(Wd*(Wd<480?1.02:.9));
+ var all=CV.cyc==="all",ci=all?v.cycles.length-1:CV.cyc,pts=all?v.pts:cyclePts(v,ci),prev=(!all&&ci>0)?cyclePts(v,ci-1):[];
+ var xc=v.x_center,yc=c.compass.infl_center;
+ var hx=Math.max(un?1.5:2,p95(pts.map(function(p){return Math.abs(p[1]-xc)}))*1.2),hy=Math.max(3,p95(pts.map(function(p){return Math.abs(p[2]-yc)}))*1.2);
+ var M=8,X=function(x){return Wd/2+(x-xc)/hx*(Wd/2-M)},Y=function(y){return Ht/2-(y-yc)/hy*(Ht/2-M)};
+ function P(p){var cx=X(p[1]),cy=Y(p[2]),off=cx<M||cx>Wd-M||cy<M||cy>Ht-M;return [Math.max(M,Math.min(Wd-M,cx)),Math.max(M,Math.min(Ht-M,cy)),off]}
+ var s='<defs><marker id="ar" viewBox="0 0 10 10" refX="5" refY="5" markerWidth="5" markerHeight="5" orient="auto"><path d="M0,0 L10,5 L0,10 z" fill="#00E0FF"/></marker></defs>';
+ var hot="rgba(255,59,107,.16)",warm="rgba(255,59,107,.08)",cool="rgba(0,224,255,.12)",calm="rgba(0,224,255,.05)";
+ var Q=un?[["OVERHEATING",hot,0,0,"start"],["STAGFLATION",warm,1,0,"end"],["SWEET SPOT",calm,0,1,"start"],["SLOWDOWN",cool,1,1,"end"]]:[["STAGFLATION",warm,0,0,"start"],["OVERHEATING",hot,1,0,"end"],["SLOWDOWN",cool,0,1,"start"],["SWEET SPOT",calm,1,1,"end"]];
+ Q.forEach(function(q){s+='<rect x="'+(q[2]*Wd/2)+'" y="'+(q[3]*Ht/2)+'" width="'+Wd/2+'" height="'+Ht/2+'" fill="'+q[1]+'"/><text class="c-q" x="'+(q[2]?Wd-10:10)+'" y="'+(q[3]?Ht-10:20)+'" text-anchor="'+q[4]+'">'+q[0]+'</text>'});
+ var st=niceStep(2*hy);for(var t=Math.ceil((yc-hy)/st)*st;t<=yc+hy;t+=st){var y=Y(t);if(y>30&&y<Ht-48)s+='<line x1="0" x2="'+Wd+'" y1="'+y+'" y2="'+y+'" stroke="#fff" stroke-opacity=".05"/><text class="c-t" x="6" y="'+(y-4)+'">'+(+t.toFixed(1))+'%</text>'}
+ st=niceStep(2*hx);for(t=Math.ceil((xc-hx)/st)*st;t<=xc+hx;t+=st){var x=X(t);if(x>34&&x<Wd-34)s+='<line y1="0" y2="'+Ht+'" x1="'+x+'" x2="'+x+'" stroke="#fff" stroke-opacity=".05"/><text class="c-t" x="'+x+'" y="'+(Ht-28)+'" text-anchor="middle">'+(+t.toFixed(1))+'%</text>'}
+ s+='<line x1="'+Wd/2+'" x2="'+Wd/2+'" y1="0" y2="'+Ht+'" stroke="#2a2d3a"/><line y1="'+Ht/2+'" y2="'+Ht/2+'" x1="0" x2="'+Wd+'" stroke="#2a2d3a"/>';
+ if(prev.length)s+='<clipPath id="cclip"><rect width="'+Wd+'" height="'+Ht+'"/></clipPath><path clip-path="url(#cclip)" d="'+prev.map(function(p,i){return (i?"L":"M")+X(p[1]).toFixed(1)+","+Y(p[2]).toFixed(1)}).join(" ")+'" fill="none" stroke="#B08CFF" stroke-width="1.3" opacity=".25"/>';
+ var n=pts.length,PP=pts.map(P),every=v.freq==="M"?3:1,dots="",hits="";
+ for(var i=1;i<n;i++){var a=PP[i-1],b=PP[i],op=(.3+.7*i/n).toFixed(2),cyc=all?v.cycles.findIndex(function(cy){return i<=cy.to}):-1,col=all&&cyc<v.cycles.length-1?["#8A8FA3","#B08CFF","#5E8BFF","#C9A2FF"][cyc%4]:"#00E0FF";
+  var long=Math.hypot(b[0]-a[0],b[1]-a[1])>26&&i%every===0;
+  s+='<path d="M'+a[0].toFixed(1)+","+a[1].toFixed(1)+" L"+((a[0]+b[0])/2).toFixed(1)+","+((a[1]+b[1])/2).toFixed(1)+" L"+b[0].toFixed(1)+","+b[1].toFixed(1)+'" fill="none" stroke="'+col+'" stroke-width="2.2" opacity="'+op+'" stroke-linejoin="round"'+(long&&col==="#00E0FF"?' marker-mid="url(#ar)"':"")+"/>"}
+ pts.forEach(function(p,i){var q=PP[i],o=(.35+.65*i/n).toFixed(2);
+  if(p[3])dots+='<circle cx="'+q[0]+'" cy="'+q[1]+'" r="5.5" fill="none" stroke="#FF3B6B" stroke-width="1.6" opacity="'+o+'"/>';
+  if(i>0&&i<n-1)dots+=q[2]?'<circle cx="'+q[0]+'" cy="'+q[1]+'" r="3.5" fill="#06060A" stroke="#00E0FF" stroke-width="1.5" opacity="'+o+'"/>':'<circle cx="'+q[0]+'" cy="'+q[1]+'" r="'+(v.freq==="M"?1.8:2.4)+'" fill="#00E0FF" opacity="'+o+'"/>';
+  hits+='<circle class="hit" tabindex="0" data-i="'+i+'" cx="'+q[0]+'" cy="'+q[1]+'" r="'+(v.freq==="M"?7:10)+'" aria-label="'+esc(p[0])+'"/>'});
+ var a0=PP[0],z=PP[n-1],right=a0[0]>Wd-170;
+ dots+='<circle cx="'+a0[0]+'" cy="'+a0[1]+'" r="6" fill="#06060A" stroke="#FF3B6B" stroke-width="2.5"/><text class="c-a" x="'+(right?a0[0]-10:a0[0]+10)+'" y="'+(a0[1]+(a0[1]>Ht-60?-12:20))+'" text-anchor="'+(right?"end":"start")+'"><tspan fill="#FF3B6B" font-weight="700">START</tspan> '+esc(pts[0][0])+'</text>';
+ dots+='<circle cx="'+z[0]+'" cy="'+z[1]+'" r="12" fill="none" stroke="#fff" opacity=".35"/><circle cx="'+z[0]+'" cy="'+z[1]+'" r="7" fill="#fff"/><text class="c-s" x="'+(z[0]<60?z[0]+16:z[0]-16)+'" y="'+(z[1]+4)+'" text-anchor="'+(z[0]<60?"start":"end")+'">NOW</text>';
+ box.innerHTML='<svg viewBox="0 0 '+Wd+" "+Ht+'" width="'+Wd+'" height="'+Ht+'" role="img" aria-label="'+esc(c.name)+' inflation against '+(un?"unemployment":"growth")+'">'+s+dots+hits+'</svg><div class="tip" id="ctip"></div>';
+ box._pts=pts;box._PP=PP;box._un=un;box._W=Wd}
+function tipShow(e){var h=e.target.closest&&e.target.closest(".hit");var box=$("cchart"),tip=$("ctip");if(!h||!tip){if(tip)tip.style.display="none";return}
+ var i=+h.getAttribute("data-i"),p=box._pts[i],q=box._PP[i],un=box._un,c=D.countries[sel];
+ tip.innerHTML="<b>"+esc(un&&c.compass.unemp.freq==="M"?p[0]:quarterSpan(p[0]))+"</b>Inflation (CPI YoY"+(c.compass[un?"unemp":"growth"].freq==="Q"?", quarter avg":"")+"): "+f1(p[2])+"%<br>"+(un?"Unemployment: ":"GDP growth (YoY): ")+f1(p[1])+"%"+(p[3]?"<br>Recession":"")+(q[2]?"<br>Off the chart":"");
+ tip.style.display="block";var svg=box.querySelector("svg"),k=svg.clientWidth/box._W,left=q[0]*k+14,top=q[1]*k+12+(box.querySelector(".yl")?0:0);
+ if(left+tip.offsetWidth>svg.clientWidth)left=q[0]*k-14-tip.offsetWidth;if(top+tip.offsetHeight>svg.clientHeight)top=q[1]*k-12-tip.offsetHeight;
+ tip.style.left=Math.max(0,left)+"px";tip.style.top=Math.max(0,top)+"px"}
+function renderTime(){var c=D.countries[sel],el=$("v-time");
+ var chips='<div class="chips" role="group" aria-label="Economy">'+D.countries.map(function(x,i){return '<button type="button" data-c="'+i+'" class="'+(i===sel?"on":"")+'" aria-pressed="'+(i===sel)+'">'+esc(x.short)+"</button>"}).join("")+"</div>";
+ if(!c.compass){el.innerHTML='<div class="cmp"><div class="side"><div class="box"><p class="lbl">Economy</p>'+chips+'</div></div><p class="empty">No history for '+esc(c.name)+' yet. It appears after the next daily update.</p></div>';return}
+ var un=CV.mode==="unemp",v=c.compass[un?"unemp":"growth"];
+ if(CV.cyc===null||CV.cyc!=="all"&&CV.cyc>=v.cycles.length)CV.cyc=v.cycles.length-1;
+ var all=CV.cyc==="all",pts=all?v.pts:cyclePts(v,CV.cyc);
+ var cyc=v.cycles.map(function(cy,i){var cur=i===v.cycles.length-1;return '<button type="button" data-y="'+i+'" class="'+(CV.cyc===i?"on":"")+'" aria-pressed="'+(CV.cyc===i)+'">'+(cur?"This cycle":cy.label)+"</button>"}).reverse().join("")+'<button type="button" data-y="all" class="'+(all?"on":"")+'" aria-pressed="'+all+'">All '+Math.round(v.pts.length/(v.freq==="M"?12:4))+" years</button>";
+ var tgt=c.compass.infl_center,quarterly=un&&v.freq==="Q";
+ var defs=un?"<b>Across:</b> unemployment rate, "+(quarterly?"quarterly":"monthly")+", against its 10-year median of "+f1(v.x_center)+"%. <b>Up:</b> CPI inflation, year on year"+(quarterly?", averaged over each quarter":", monthly")+", against the "+esc(c.compass.target)+" target"+(c.compass.target.indexOf("to")>0?" (midpoint "+f1(tgt)+"%)":"")+"."
+  :"<b>Across:</b> real GDP growth, year on year, against its 10-year median of "+f1(v.x_center)+"%. <b>Up:</b> CPI inflation, year on year, averaged over the three months of each quarter to match quarterly GDP, against the "+esc(c.compass.target)+" target"+(c.compass.target.indexOf("to")>0?" (midpoint "+f1(tgt)+"%)":"")+".";
+ if(quarterly)defs+=" "+esc(c.name)+" only publishes "+(c.code==="CH"?"unemployment":c.code==="AU"?"inflation":"inflation and unemployment")+" quarterly, so this view has one dot per quarter.";
+ defs+=" Ringed dots are recessions ("+(c.compass.rec_rule==="nber"?"official NBER dates":"two or more quarters in a row of falling GDP")+"). Hollow dots are off the scale.";
+ el.innerHTML='<div class="cmp"><div class="side"><div class="box"><p class="lbl">Economy</p>'+chips+'</div>'+
+  '<div class="box"><p class="lbl">'+esc(c.short)+" · "+(all?"since "+esc(pts[0][0]):CV.cyc===v.cycles.length-1?"current cycle, since "+esc(pts[0][0]):esc(pts[0][0])+" to "+esc(pts[pts.length-1][0]))+'</p><p class="story">'+story(c,v,pts,un,all||CV.cyc===v.cycles.length-1)+'</p></div>'+
+  '<div class="box opts"><p class="lbl">Compare inflation with</p><div class="chips" id="cmode"><button type="button" data-m="growth" class="'+(un?"":"on")+'" aria-pressed="'+!un+'">GDP growth</button><button type="button" data-m="unemp" class="'+(un?"on":"")+'" aria-pressed="'+un+'">Unemployment</button></div>'+
+  '<p class="lbl" style="margin-top:14px">Show</p><div class="chips" id="ccyc">'+cyc+'</div><p class="defs">One dot per '+(v.freq==="M"?"month":"quarter")+'. Arrows show the direction of travel.'+(all?"":" The faint line is the previous cycle, for comparison.")+'</p></div></div>'+
+  '<div class="chart"><p class="yl">↑ Higher inflation</p><div id="cchart"><svg></svg></div><div class="xl"><span>← '+(un?"Lower unemployment":"Weaker growth")+'</span><span>'+(un?"Higher unemployment":"Stronger growth")+' →</span></div><p class="defs">'+defs+"</p></div></div>";
+ compassChart(c,v,un)}
+function setTab(t){CV.tab=t;var time=t==="time";$("v-now").hidden=time;$("v-time").hidden=!time;$("tab-now").className=time?"":"on";$("tab-time").className=time?"on":"";
+ $("tab-now").setAttribute("aria-selected",!time);$("tab-time").setAttribute("aria-selected",time);document.querySelector(".wrap").classList.toggle("wide",time);
+ $("sub").textContent=time?"Where each economy has been on inflation and growth (or unemployment), and the path it took to get here. Pick a country and a business cycle.":"Central banks raise interest rates when an economy runs hot and cut them when it runs cold. Here is where each major economy sits right now. Tap a country for the detail.";
+ if(D&&D.countries&&D.countries.length){if(time)renderTime();else{overview();detail()}}}
+$("tab-now").addEventListener("click",function(){setTab("now")});
+$("tab-time").addEventListener("click",function(){setTab("time")});
+$("v-time").addEventListener("click",function(e){var b=e.target.closest("button");
+ if(b&&b.hasAttribute("data-c")){sel=+b.getAttribute("data-c");CV.cyc=null;renderTime()}
+ else if(b&&b.hasAttribute("data-m")){CV.mode=b.getAttribute("data-m");CV.cyc=null;renderTime()}
+ else if(b&&b.hasAttribute("data-y")){var y=b.getAttribute("data-y");CV.cyc=y==="all"?"all":+y;renderTime()}
+ else tipShow(e)});
+$("v-time").addEventListener("mouseover",tipShow);
+$("v-time").addEventListener("focusin",tipShow);
+$("v-time").addEventListener("mouseleave",function(){var t=$("ctip");if(t)t.style.display="none"});
+var rz;window.addEventListener("resize",function(){clearTimeout(rz);rz=setTimeout(function(){if(CV.tab==="time"&&D&&D.countries&&D.countries[sel]&&D.countries[sel].compass)compassChart(D.countries[sel],D.countries[sel].compass[CV.mode==="unemp"?"unemp":"growth"],CV.mode==="unemp")},150)});
 if(window.__EMBED){D=window.__EMBED;render()}
 else{$("upd").textContent="Loading…";fetch("data.json?"+Date.now()).then(function(r){return r.json()}).then(function(j){D=j;render()}).catch(function(){$("ov").innerHTML='<p class="empty">Could not load the data.</p>';$("upd").textContent=""})}
 </script>
