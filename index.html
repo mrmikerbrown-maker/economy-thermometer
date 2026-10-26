@@ -136,6 +136,20 @@ h1{font-size:clamp(22px,4.4vw,30px);line-height:1.15;margin:0 0 8px;color:var(--
 .an-n{display:inline-grid;place-items:center;width:20px;height:20px;border-radius:50%;background:#FFC24D;color:#06060A;font-size:12px;font-weight:700;margin-right:6px}
 .an .note{margin:12px 0 0;color:var(--muted);font-size:12px}
 @media(max-width:760px){.an-g{grid-template-columns:1fr}}
+.tbar{display:flex;flex-direction:column;gap:10px;margin-bottom:14px}
+.econ{display:flex;gap:6px;overflow-x:auto;scrollbar-width:none;padding-bottom:2px}.econ::-webkit-scrollbar{display:none}
+.econ button{flex:none}
+.ctrls{display:flex;flex-wrap:wrap;gap:10px 22px;align-items:center;border-top:1px solid var(--line);border-bottom:1px solid var(--line);padding:10px 0}
+.grp{display:flex;align-items:center;gap:8px;flex-wrap:wrap}.grp>.lbl{margin:0;white-space:nowrap}
+.seg{display:inline-flex;border:1px solid var(--line);border-radius:99px;padding:2px}
+.seg button{appearance:none;font:inherit;font-size:13px;border:0;background:none;color:var(--muted);border-radius:99px;padding:4px 12px;cursor:pointer}
+.seg button.on{background:var(--line);color:var(--text);font-weight:600}
+.chips button .ct{display:inline-grid;place-items:center;min-width:18px;height:18px;border-radius:9px;background:#FFC24D;color:#06060A;font-size:11px;font-weight:700;margin-left:6px;padding:0 4px}
+.cmp2{display:grid;grid-template-columns:minmax(0,1fr) 280px;gap:18px;align-items:start}
+.side2{display:flex;flex-direction:column;gap:12px}
+.key{display:grid;gap:7px;font-size:12.5px;color:var(--text2)}.key div{display:flex;align-items:center;gap:8px}.key svg{flex:none}
+details.about{font-size:12.5px;color:var(--muted)}details.about summary{cursor:pointer;color:var(--text2)}details.about p{margin:8px 0 0;line-height:1.5}
+@media (max-width:760px){.cmp2{grid-template-columns:minmax(0,1fr)}.side2{display:contents}.side2 .storybox{order:-1}.ctrls{gap:10px 16px}}
 </style>
 </head>
 <body>
@@ -157,7 +171,7 @@ h1{font-size:clamp(22px,4.4vw,30px);line-height:1.15;margin:0 0 8px;color:var(--
 <li><b>Targets used:</b> 2% for the US, euro area, UK, Japan, Norway and Sweden (within half a point of the target counts as in line), 1 to 3% for Canada and New Zealand, 2 to 3% for Australia and 0 to 2% for Switzerland. The Fed targets a slightly different measure of inflation (PCE) that usually runs a little lower than the CPI shown here.</li>
 <li><b>Timing:</b> each figure is the latest published, so the dates differ between countries and indicators. Some are a few months old. Unemployment follows the international survey-based definition, so the Swiss figure is higher than the registered rate quoted locally.</li>
 <li><b>Interest rate:</b> the central bank's main policy rate. For the US it is the upper end of the Fed's target range. "Usually" matters: central banks look at many things, and this is a summary, not a forecast. Not trading advice.</li>
-<li><b>Over time</b> plots inflation against either growth or unemployment, one dot per quarter (growth) or per month (unemployment). The trail runs from the start of the chosen business cycle to now, with arrows showing the direction of travel. The centre of the chart is the inflation target and the country's 10-year median for growth or unemployment. Growth there is year on year, not on the previous quarter, because quarterly figures jump around too much to draw a readable path. Ringed dots are recessions: the official NBER dates for the US and, elsewhere, two or more quarters in a row of falling GDP. Hollow dots are off the scale and pinned to the edge; hover or tap one for its real value. The <b>Textbook cycle</b> button adds a dashed loop showing how a cycle runs in theory: recovery, boom, late cycle, downturn. It is a guide to the shape, not a forecast. Under the growth chart, the <b>Last time … looked like this</b> panel picks the quarter in each past business cycle closest to today on growth and inflation, counting only quarters when inflation was moving the same way as now. Each gap is scaled by how much that measure usually swings in that country, and a cycle that never came close gives no match. For each match it shows what the main stock index, the 10-year government bond yield and the currency did over the next 3 and 12 months.</li>
+<li><b>Over time</b> plots inflation against either growth or unemployment, one dot per quarter (growth) or per month (unemployment). The trail runs from the start of the chosen business cycle to now, with arrows showing the direction of travel. The centre of the chart is the inflation target and the country's 10-year median for growth or unemployment. Growth there is year on year, not on the previous quarter, because quarterly figures jump around too much to draw a readable path. Ringed dots are recessions: the official NBER dates for the US and, elsewhere, two or more quarters in a row of falling GDP. Hollow dots are off the scale and pinned to the edge; hover or tap one for its real value. The <b>Textbook cycle</b> button adds a dashed loop showing how a cycle runs in theory: recovery, boom, late cycle, downturn. It is a guide to the shape, not a forecast. The <b>Past matches</b> button (growth view only) marks the quarter in each past business cycle closest to today and adds a panel below the chart. It looks at growth and inflation together, counting only quarters when inflation was moving the same way as now. Each gap is scaled by how much that measure usually swings in that country, and a cycle that never came close gives no match. For each match it shows what the main stock index, the 10-year government bond yield and the currency did over the next 3 and 12 months.</li>
 <li><b>Sources:</b> Bank for International Settlements, OECD and national statistics offices via FRED, Eurostat and the US Bureau of Economic Analysis.</li></ul></details></div>
 <a class="cta" href="https://newsquawk.com">Take a 1-week trial → newsquawk.com</a>
 </div>
@@ -237,7 +251,7 @@ function showReading(e){var point=e.target.closest(".trend-point");if(point)poin
 $("dt").addEventListener("click",showReading);
 $("dt").addEventListener("focusin",showReading);
 /* Over time: the economic compass. Inflation (up) against growth or unemployment (across), one trail per business cycle. */
-var CV={mode:"growth",cs:null,tab:"now",tb:false};
+var CV={mode:"growth",cs:null,tab:"now",tb:false,pm:false};
 var CCOL=["#00E0FF","#B08CFF","#FFB547","#5E8BFF","#FF7AC6","#8A8FA3"];
 function cycCol(v,i){return CCOL[Math.min(v.cycles.length-1-i,CCOL.length-1)]}
 var MON=["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
@@ -260,8 +274,7 @@ function cyclePts(v,i){var cy=v.cycles[i];return v.pts.slice(cy.from,cy.to+1)}
 function compassChart(c,v,un){
  var box=$("cchart"),Wd=Math.max(300,Math.min(680,box.clientWidth||600)),Ht=Math.round(Wd*(Wd<480?1.02:.9));
  var last=v.cycles.length-1,G=CV.cs.map(function(i){return {i:i,pts:cyclePts(v,i),col:cycCol(v,i),cur:i===last}}),pts=[].concat.apply([],G.map(function(g){return g.pts}));
- var AM=un?[]:anPaths(v),sp=pts.concat([].concat.apply([],AM));
- var prev=(G.length===1&&G[0].i>0)?cyclePts(v,G[0].i-1):[];
+ var AM=un||!CV.pm?[]:anPaths(v),sp=pts.concat([].concat.apply([],AM));
  var xc=v.x_center,yc=c.compass.infl_center;
  var hx=Math.max(un?1.5:2,p95(sp.map(function(p){return Math.abs(p[1]-xc)}))*1.2),hy=Math.max(3,p95(sp.map(function(p){return Math.abs(p[2]-yc)}))*1.2);
  var M=8,X=function(x){return Wd/2+(x-xc)/hx*(Wd/2-M)},Y=function(y){return Ht/2-(y-yc)/hy*(Ht/2-M)};
@@ -280,7 +293,6 @@ function compassChart(c,v,un){
    s+='<path d="M-6,-5 L4,0 L-6,5 z" fill="#fff" fill-opacity=".6" transform="translate('+a[0].toFixed(1)+","+a[1].toFixed(1)+") rotate("+(Math.atan2(b[1]-a[1],b[0]-a[0])*180/Math.PI).toFixed(0)+')"/>'});
   [[1.5,"1 Recovery"],[0,"2 Boom"],[.5,"3 Late cycle"],[1,"4 Downturn"]].forEach(function(L){var a=TB(L[0]*Math.PI),ox=Math.round(Math.cos(L[0]*Math.PI))*sg,oy=-Math.round(Math.sin(L[0]*Math.PI));
    s+='<text class="c-tb" x="'+(a[0]-ox*12).toFixed(1)+'" y="'+(a[1]+(ox?4:oy*16+4)).toFixed(1)+'" text-anchor="'+(ox?(ox>0?"end":"start"):"middle")+'">'+L[1]+"</text>"})}
- if(prev.length)s+='<clipPath id="cclip"><rect width="'+Wd+'" height="'+Ht+'"/></clipPath><path clip-path="url(#cclip)" d="'+prev.map(function(p,i){return (i?"L":"M")+X(p[1]).toFixed(1)+","+Y(p[2]).toFixed(1)}).join(" ")+'" fill="none" stroke="#B08CFF" stroke-width="1.3" opacity=".25"/>';
  var every=v.freq==="M"?3:1,dots="",hits="",marks="",AP=[],APP=[],few=G.length<=3&&G.length<v.cycles.length;
  function lbl(q,word,date,col,below){var right=q[0]>Wd-170;return '<text class="c-a" x="'+(right?q[0]-12:q[0]+12)+'" y="'+Math.max(34,Math.min(Ht-50,q[1]+(below?(q[1]>Ht-60?-14:22):(q[1]<40?22:-12))))+'" text-anchor="'+(right?"end":"start")+'"><tspan fill="'+col+'" font-weight="700">'+word+'</tspan> '+esc(date)+'</text>'}
  G.forEach(function(g,gi){var gp=g.pts,n=gp.length,PP=gp.map(P);
@@ -309,7 +321,7 @@ function tipShow(e){var h=e.target.closest&&e.target.closest(".hit");var box=$("
  tip.style.display="block";var svg=box.querySelector("svg"),k=svg.clientWidth/box._W,left=q[0]*k+14,top=q[1]*k+12+(box.querySelector(".yl")?0:0);
  if(left+tip.offsetWidth>svg.clientWidth)left=q[0]*k-14-tip.offsetWidth;if(top+tip.offsetHeight>svg.clientHeight)top=q[1]*k-12-tip.offsetHeight;
  tip.style.left=Math.max(0,left)+"px";tip.style.top=Math.max(0,top)+"px"}
-function anBox(c){var v=c.compass.growth,a=v.last_time;if(!a||CV.mode==="unemp")return "";var AM=anPaths(v),nm={US:"the US",EA:"the eurozone",GB:"the UK"}[c.code]||c.name,N=a.names;
+function anBox(c){var v=c.compass.growth,a=v.last_time;if(!a||CV.mode==="unemp"||!CV.pm)return "";var AM=anPaths(v),nm={US:"the US",EA:"the eurozone",GB:"the UK"}[c.code]||c.name,N=a.names;
  function f(x,u,dp,inv){if(x==null)return '<td class="na">n/a</td>';var g=inv?x<0:x>0;return '<td class="'+(x===0?"":g?"up":"dn")+'">'+(x>0?"+":"")+x.toFixed(dp)+u+"</td>"}
  var crit="quarters when growth and inflation were both close to today's levels, with inflation "+a.dir+" as it is now";
  if(!a.rows.length)return '<div class="an"><h3>Last time '+esc(nm)+' looked like this</h3><p class="sub">No past cycle in the last 20 years looked like this. We looked for '+crit+', and none came close enough to compare.</p></div>';
@@ -331,11 +343,20 @@ function renderTime(){var c=D.countries[sel],el=$("v-time");
   :"<b>Across:</b> real GDP growth, year on year, against its 10-year median of "+f1(v.x_center)+"%. <b>Up:</b> CPI inflation, year on year, averaged over the three months of each quarter to match quarterly GDP, against the "+esc(c.compass.target)+" target"+(c.compass.target.indexOf("to")>0?" (midpoint "+f1(tgt)+"%)":"")+".";
  if(quarterly)defs+=" "+esc(c.name)+" only publishes "+(c.code==="CH"?"unemployment":c.code==="AU"?"inflation":"inflation and unemployment")+" quarterly, so this view has one dot per quarter.";
  defs+=" Ringed dots are recessions ("+(c.compass.rec_rule==="nber"?"official NBER dates":"two or more quarters in a row of falling GDP")+"). Hollow dots are off the scale.";
- el.innerHTML='<div class="cmp"><div class="side"><div class="box"><p class="lbl">Economy</p>'+chips+'</div>'+
-  '<div class="box"><p class="lbl">'+esc(c.short)+" · "+(all?"since "+esc(pts[0][0]):top===last?"current cycle, since "+esc(pts[0][0]):esc(pts[0][0])+" to "+esc(pts[pts.length-1][0]))+'</p><p class="story">'+story(c,v,pts,un,cur)+'</p>'+(also.length?'<p class="defs">Also on the chart: '+also.join(", ")+".</p>":"")+'</div>'+
-  '<div class="box opts"><p class="lbl">Compare inflation with</p><div class="chips" id="cmode"><button type="button" data-m="growth" class="'+(un?"":"on")+'" aria-pressed="'+!un+'">GDP growth</button><button type="button" data-m="unemp" class="'+(un?"on":"")+'" aria-pressed="'+un+'">Unemployment</button></div>'+
-  '<p class="lbl" style="margin-top:14px">Guide</p><div class="chips"><button type="button" data-tb="1" class="'+(CV.tb?"on":"")+'" aria-pressed="'+CV.tb+'">Textbook cycle</button></div>'+(CV.tb?'<p class="defs">The dashed loop is how a cycle runs in theory: 1 growth recovers while inflation is low, 2 a boom pushes inflation up, 3 growth fades while inflation peaks, 4 both fall. Its size and position are illustrative only; real cycles rarely follow it neatly.</p>':"")+'<p class="lbl" style="margin-top:14px">Show</p><div class="chips" id="ccyc">'+cyc+'</div><p class="defs">One dot per '+(v.freq==="M"?"month":"quarter")+'. Arrows show the direction of travel.'+(CV.cs.length===1?(top>0?" The faint line is the previous cycle, for comparison.":"")+" Tap more than one cycle to compare them.":" Colours match the buttons above.")+'</p></div></div>'+
-  '<div class="chart"><p class="yl">↑ Higher inflation</p><div id="cchart"><svg></svg></div><div class="xl"><span>← '+(un?"Lower unemployment":"Weaker growth")+'</span><span>'+(un?"Higher unemployment":"Stronger growth")+' →</span></div><p class="defs">'+defs+"</p></div></div>"+anBox(c);
+  var lt=v.last_time,npm=!un&&lt?lt.rows.length:0,pmOn=CV.pm&&!un&&lt;
+ var key='<div class="key">'+
+  '<div><svg width="22" height="10"><line x1="1" y1="5" x2="21" y2="5" stroke="#00E0FF" stroke-width="2"/></svg>Path of the economy, one dot per '+(v.freq==="M"?"month":"quarter")+'</div>'+
+  '<div><svg width="22" height="12"><circle cx="11" cy="6" r="5" fill="none" stroke="#FF3B6B" stroke-width="1.6"/></svg>Recession</div>'+
+  (CV.tb?'<div><svg width="22" height="10"><line x1="1" y1="5" x2="21" y2="5" stroke="#fff" stroke-opacity=".5" stroke-dasharray="4 3"/></svg>Textbook cycle (illustrative)</div>':"")+
+  (pmOn?'<div><svg width="22" height="12"><circle cx="11" cy="6" r="6" fill="#FFC24D"/></svg>Past match, and the year after it</div>':"")+'</div>';
+ el.innerHTML='<div class="tbar"><div class="econ chips" role="group" aria-label="Economy">'+D.countries.map(function(x,i){return '<button type="button" data-c="'+i+'" class="'+(i===sel?"on":"")+'" aria-pressed="'+(i===sel)+'">'+esc(x.short)+"</button>"}).join("")+'</div>'+
+  '<div class="ctrls"><div class="grp"><span class="lbl">Inflation vs</span><div class="seg"><button type="button" data-m="growth" class="'+(un?"":"on")+'">Growth</button><button type="button" data-m="unemp" class="'+(un?"on":"")+'">Unemployment</button></div></div>'+
+  '<div class="grp"><span class="lbl">Cycles</span><div class="chips" id="ccyc">'+cyc+'</div></div>'+
+  '<div class="grp"><span class="lbl">Add</span><div class="chips"><button type="button" data-tb="1" class="'+(CV.tb?"on":"")+'" aria-pressed="'+CV.tb+'">Textbook cycle</button>'+(un||!lt?"":'<button type="button" data-pm="1" class="'+(CV.pm?"on":"")+'" aria-pressed="'+CV.pm+'">Past matches'+(npm?'<span class="ct">'+npm+"</span>":"")+"</button>")+'</div></div></div></div>'+
+  '<div class="cmp2"><div class="chart"><p class="yl">↑ Higher inflation</p><div id="cchart"><svg></svg></div><div class="xl"><span>← '+(un?"Lower unemployment":"Weaker growth")+'</span><span>'+(un?"Higher unemployment":"Stronger growth")+' →</span></div></div>'+
+  '<div class="side2"><div class="box storybox"><p class="lbl">'+esc(c.short)+" · "+(all?"since "+esc(pts[0][0]):top===last?"current cycle, since "+esc(pts[0][0]):esc(pts[0][0])+" to "+esc(pts[pts.length-1][0]))+'</p><p class="story">'+story(c,v,pts,un,cur)+'</p>'+(also.length?'<p class="defs">Also on the chart: '+also.join(", ")+".</p>":"")+'</div>'+
+  '<div class="box">'+key+(CV.tb?'<p class="defs">The dashed loop is how a cycle runs in theory: 1 recovery, 2 boom, 3 late cycle, 4 downturn. Real cycles rarely follow it neatly.</p>':"")+'</div>'+
+  '<details class="about"><summary>About this chart</summary><p>'+defs+'</p></details></div></div>'+anBox(c);
  compassChart(c,v,un)}
 function setTab(t){CV.tab=t;var time=t==="time";$("v-now").hidden=time;$("v-time").hidden=!time;$("tab-now").className=time?"":"on";$("tab-time").className=time?"on":"";
  $("tab-now").setAttribute("aria-selected",!time);$("tab-time").setAttribute("aria-selected",time);document.querySelector(".wrap").classList.toggle("wide",time);
@@ -347,6 +368,7 @@ $("v-time").addEventListener("click",function(e){var b=e.target.closest("button"
  if(b&&b.hasAttribute("data-c")){sel=+b.getAttribute("data-c");CV.cs=null;renderTime()}
  else if(b&&b.hasAttribute("data-m")){CV.mode=b.getAttribute("data-m");CV.cs=null;renderTime()}
  else if(b&&b.hasAttribute("data-tb")){CV.tb=!CV.tb;renderTime()}
+ else if(b&&b.hasAttribute("data-pm")){CV.pm=!CV.pm;renderTime()}
  else if(b&&b.hasAttribute("data-y")){var y=b.getAttribute("data-y"),v=D.countries[sel].compass[CV.mode==="unemp"?"unemp":"growth"],n=v.cycles.length;
   if(y==="all")CV.cs=CV.cs.length===n?[n-1]:v.cycles.map(function(_,i){return i});
   else{y=+y;var k=CV.cs.indexOf(y);if(k<0)CV.cs=CV.cs.concat([y]).sort(function(p,q){return p-q});else if(CV.cs.length>1)CV.cs=CV.cs.filter(function(i){return i!==y})}
