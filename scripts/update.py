@@ -9,6 +9,8 @@ The page (index.html) only draws what is in data.json.
 Sources
   Inflation (price index, we compute year-on-year) and policy rates: Bank for International Settlements
   Unemployment and GDP growth: FRED (St. Louis Fed) CSV downloads; euro area from Eurostat
+  "Last time we were here" market moves: stock indices and currencies from Yahoo Finance's chart API,
+  10-year government bond yields from FRED (OECD monthly averages)
 Standard library only. Run with --demo to test everything on made-up data (no internet needed).
 """
 import csv
@@ -20,17 +22,20 @@ import os
 import sys
 import time
 from urllib.error import HTTPError, URLError
+from urllib.parse import quote
 from urllib.request import Request, urlopen
 
 ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 CFG = json.load(open(os.path.join(ROOT, "config.json"), encoding="utf-8"))
 OUT = os.path.join(ROOT, "data.json")
 UA = "Mozilla/5.0 (compatible; economy-thermometer/1.0)"
+BROWSER_UA = "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/130.0 Safari/537.36"
 SCHEMA = 3  # bump when the meaning of a stored figure changes, so old values are never reused
 DEMO = "--demo" in sys.argv
 TODAY = dt.date.today()
 HIST_YEARS = CFG.get("history_years", 10)
 COMPASS_YEARS = CFG.get("compass_years", 20)
+LAST_TIME_MAX = CFG.get("last_time_max_distance", 0.5)
 FETCH_YEARS = max(HIST_YEARS, COMPASS_YEARS) + 2  # extra years so the first year-on-year figures exist
 MONTHS = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"]
 SCORE = {"cold": -2, "cool": -1, "normal": 0, "warm": 1, "hot": 2}
@@ -38,11 +43,11 @@ SCORE = {"cold": -2, "cool": -1, "normal": 0, "warm": 1, "hot": 2}
 # ----------------------------------------------------------------------------- fetching
 
 
-def http_get(url):
+def http_get(url, ua=UA):
     last = None
     for attempt in range(3):
         try:
-            req = Request(url, headers={"User-Agent": UA, "Accept": "*/*"})
+            req = Request(url, headers={"User-Agent": ua, "Accept": "*/*"})
             with urlopen(req, timeout=45) as r:
                 return r.read().decode("utf-8", errors="replace")
         except (HTTPError, URLError, TimeoutError, OSError) as e:
@@ -51,11 +56,11 @@ def http_get(url):
     raise RuntimeError("could not fetch %s (%s)" % (url, last))
 
 
-def get(url):
+def get(url, ua=UA):
     if DEMO:
         import demo_data  # noqa: made-up responses in the real formats, for testing
         return demo_data.respond(url, TODAY)
-    return http_get(url)
+    return http_get(url, ua)
 
 
 # ----------------------------------------------------------------------------- period helpers
@@ -127,6 +132,26 @@ def bis_csv(flow, key, start):
     if not out:
         raise RuntimeError("BIS %s returned no data" % flow)
     return {k: sorted(v) for k, v in out.items()}
+
+
+def yahoo_monthly(symbol):
+    """Month-end closes from Yahoo Finance, keyed by month. Explicit dates are needed: with range=max
+    Yahoo thins long histories to quarterly bars."""
+    p1 = int(dt.datetime(TODAY.year - FETCH_YEARS, 1, 1, tzinfo=dt.timezone.utc).timestamp())
+    p2 = int(time.time()) + 86400
+    text = get("https://query1.finance.yahoo.com/v8/finance/chart/%s?period1=%d&period2=%d&interval=1mo" % (quote(symbol), p1, p2), BROWSER_UA)
+    res = json.loads(text)["chart"]["result"][0]
+    closes = res["indicators"]["quote"][0].get("close") or []
+    out = {}
+    for t, v in zip(res.get("timestamp") or [], closes):
+        if v is not None and math.isfinite(v):
+            # bars are stamped at the start of the month in exchange time, which can fall on the last day
+            # of the month before in UTC; a few days' shift lands every stamp in the right month
+            d = dt.datetime.fromtimestamp(t + 3 * 86400, dt.timezone.utc)
+            out[mkey(d.year, d.month)] = v
+    if not out:
+        raise RuntimeError("Yahoo %s returned no data" % symbol)
+    return out
 
 
 def eurostat(dataset, params, since):
@@ -385,6 +410,98 @@ def median(vals):
     return pct(sorted(vals), 0.5)
 
 
+# ----------------------------------------------------------------------------- "last time we were here"
+
+
+def label_to_q(text):
+    """'Q4 2007' -> '2007-Q4'."""
+    n, y = text.split()
+    return qkey(int(y), int(n[1]))
+
+
+def sd(vals):
+    m = sum(vals) / len(vals)
+    return math.sqrt(sum((v - m) ** 2 for v in vals) / len(vals))
+
+
+def matches(view):
+    """The quarter in each past business cycle closest to today on growth and inflation, counting only
+    quarters when inflation was moving the same way as now (against a year earlier). Each gap is scaled
+    by how much that measure swings over the whole history, so growth does not drown out inflation.
+    A cycle that never came within LAST_TIME_MAX of today gives no match."""
+    pts, cyc = view["pts"], view["cycles"]
+    keys = [label_to_q(p[0]) for p in pts]
+    at = {k: i for i, k in enumerate(keys)}
+    sx, sy = sd([p[1] for p in pts]), sd([p[2] for p in pts])
+
+    def change(i):
+        j = at.get(q_add(keys[i], -4))
+        return None if j is None else pts[i][2] - pts[j][2]
+
+    now = len(pts) - 1
+    dn = change(now)
+    if dn is None or not sx or not sy:
+        raise RuntimeError("not enough history to look for matches")
+    rising, found = dn >= 0, []
+    for c in cyc[:-1]:
+        best = None
+        for i in range(c["from"], c["to"]):  # a cycle's last quarter is the next one's start
+            d = change(i)
+            if d is None or (d >= 0) != rising:
+                continue
+            dist = math.hypot((pts[i][1] - pts[now][1]) / sx, (pts[i][2] - pts[now][2]) / sy)
+            if best is None or dist < best[0]:
+                best = (dist, i)
+        if best and best[0] <= LAST_TIME_MAX:
+            i = best[1]
+            path = [at[q_add(keys[i], n)] for n in range(1, 5) if q_add(keys[i], n) in at]
+            found.append({"i": i, "cyc": c["label"], "dist": round(best[0], 2), "path": path})
+    return ("rising" if rising else "falling"), found
+
+
+def market_moves(m, quarter, series):
+    """Moves over 3 and 12 months from the end of the matched quarter. Stocks and currencies in %,
+    yields in basis points. Months that have not finished yet give no figure."""
+    base = mkey(int(quarter[:4]), int(quarter[-1]) * 3)
+    this_month = TODAY.strftime("%Y-%m")
+    out = {}
+    for name, s in series.items():
+        vals = []
+        for h in (3, 12):
+            a, b, end = s.get(base) if s else None, s.get(month_add(base, h)) if s else None, month_add(base, h)
+            if a is None or b is None or end >= this_month:
+                vals.append(None)
+            elif name == "yield":
+                vals.append(int(round((b - a) * 100)))
+            else:
+                vals.append(round((b / a - 1) * 100, 1 if name == "stocks" else 2))
+        out[name] = vals
+    return out
+
+
+def last_time(view, m, old, log, code):
+    direction, found = matches(view)
+    series = {}
+    if found:
+        for name in ("stocks", "yield", "fx"):
+            src = m[name]
+            try:
+                series[name] = dict(fred_csv(src["fred"], "M")) if "fred" in src else yahoo_monthly(src["yahoo"])
+            except Exception as e:
+                series[name] = None
+                log.append("FAIL %s %s for last time: %s" % (code, src.get("fred") or src.get("yahoo"), e))
+    kept = {r["q"]: r for r in (old or {}).get("rows", [])}
+    rows = []
+    for f in found:
+        q = view["pts"][f["i"]][0]
+        mv = market_moves(m, label_to_q(q), series)
+        for name in mv:  # if a source was down today, keep the figures worked out on an earlier run
+            if all(v is None for v in mv[name]) and q in kept:
+                mv[name] = kept[q].get(name, mv[name])
+        rows.append(dict(f, q=q, **mv))
+    return {"dir": direction, "names": {k: m[k]["name"] for k in ("stocks", "yield", "fx")}, "rows": rows}
+
+
 # ----------------------------------------------------------------------------- the run
 
 
@@ -515,6 +632,10 @@ def main():
             out = {"asof_label": label(gdp_yoy[-1][0]), "infl_center": round((c["target"]["lo"] + c["target"]["hi"]) / 2, 2),
                    "target": c["target"]["label"], "rec_rule": "nber" if code == "US" and usrec is not None else "gdp",
                    "growth": compass_view(gdp_yoy, infl_q, rec_q, "Q", median(tail))}
+            try:
+                out["growth"]["last_time"] = last_time(out["growth"], c["markets"], old.get("compass", {}).get("growth", {}).get("last_time"), log, code)
+            except Exception as e:
+                log.append("FAIL %s last time: %s" % (code, e))
             jobs_m = raw["jobs"] if c["jobs"]["freq"] == "M" else None
             if jobs_m and c.get("cpi_freq", "M") == "M":
                 un, infl, rec, fq = jobs_m, cpi_yoy(index), rec_m, "M"
