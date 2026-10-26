@@ -1,0 +1,9 @@
+query1 browser HTTP 429
+query1 bot 200 31131
+query1 plain 200 31131
+query1 curl HTTP 429
+query2 browser HTTP 429
+query2 bot 200 31131
+query2 plain 200 31131
+query2 curl HTTP 429
+curl 429
