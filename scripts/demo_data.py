@@ -41,6 +41,8 @@ def respond(url, today):
         return eurostat_une(url, today)
     if "namq_10_gdp" in url:
         return eurostat_gdp(url, today)
+    if "finance.yahoo.com" in url:
+        return yahoo(url, today)
     raise RuntimeError("demo: unknown url " + url)
 
 
@@ -70,7 +72,7 @@ def fred(url, today):
                 rows.append("%d-%02d-01,%.5f" % (y, m, g))
     else:
         base = 3 + r.random() * 5
-        monthly = sid == "UNRATE" or sid.endswith("M156S")
+        monthly = sid == "UNRATE" or sid.endswith("M156S") or sid.endswith("M156N")
         (ey, em) = lag(today, 2 if monthly else 4)
         u = base
         for y, m in months_between(start_y, 1, ey, em):
@@ -150,3 +152,17 @@ def eurostat_gdp(url, today):
             ps.append("%d-Q%d" % (y, (m - 1) // 3 + 1))
             vs.append(round(r.gauss(0.35, 0.3), 1))
     return jsonstat(ps, vs)
+
+
+def yahoo(url, today):
+    import datetime as dt
+    sym = re.search(r"chart/([^?]+)", url).group(1)
+    r = rng(sym)
+    p1 = int(re.search(r"period1=(\d+)", url).group(1))
+    start = dt.datetime.fromtimestamp(p1, dt.timezone.utc)
+    ts, closes, v = [], [], 100.0
+    for y, m in months_between(start.year, start.month, today.year, today.month):
+        v *= 1 + r.gauss(0.006, 0.045)
+        ts.append(int(dt.datetime(y, m, 1, tzinfo=dt.timezone.utc).timestamp()))
+        closes.append(round(v, 4))
+    return json.dumps({"chart": {"result": [{"timestamp": ts, "indicators": {"quote": [{"close": closes}]}}]}})
