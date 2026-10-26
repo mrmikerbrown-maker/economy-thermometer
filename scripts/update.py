@@ -29,7 +29,6 @@ ROOT = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 CFG = json.load(open(os.path.join(ROOT, "config.json"), encoding="utf-8"))
 OUT = os.path.join(ROOT, "data.json")
 UA = "Mozilla/5.0 (compatible; economy-thermometer/1.0)"
-BROWSER_UA = "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/130.0 Safari/537.36"
 SCHEMA = 3  # bump when the meaning of a stored figure changes, so old values are never reused
 DEMO = "--demo" in sys.argv
 TODAY = dt.date.today()
@@ -43,11 +42,11 @@ SCORE = {"cold": -2, "cool": -1, "normal": 0, "warm": 1, "hot": 2}
 # ----------------------------------------------------------------------------- fetching
 
 
-def http_get(url, ua=UA):
+def http_get(url):
     last = None
     for attempt in range(3):
         try:
-            req = Request(url, headers={"User-Agent": ua, "Accept": "*/*"})
+            req = Request(url, headers={"User-Agent": UA, "Accept": "*/*"})
             with urlopen(req, timeout=45) as r:
                 return r.read().decode("utf-8", errors="replace")
         except (HTTPError, URLError, TimeoutError, OSError) as e:
@@ -56,11 +55,11 @@ def http_get(url, ua=UA):
     raise RuntimeError("could not fetch %s (%s)" % (url, last))
 
 
-def get(url, ua=UA):
+def get(url):
     if DEMO:
         import demo_data  # noqa: made-up responses in the real formats, for testing
         return demo_data.respond(url, TODAY)
-    return http_get(url, ua)
+    return http_get(url)
 
 
 # ----------------------------------------------------------------------------- period helpers
@@ -139,7 +138,11 @@ def yahoo_monthly(symbol):
     Yahoo thins long histories to quarterly bars."""
     p1 = int(dt.datetime(TODAY.year - FETCH_YEARS, 1, 1, tzinfo=dt.timezone.utc).timestamp())
     p2 = int(time.time()) + 86400
-    text = get("https://query1.finance.yahoo.com/v8/finance/chart/%s?period1=%d&period2=%d&interval=1mo" % (quote(symbol), p1, p2), BROWSER_UA)
+    path = "/v8/finance/chart/%s?period1=%d&period2=%d&interval=1mo" % (quote(symbol), p1, p2)
+    try:
+        text = get("https://query1.finance.yahoo.com" + path)
+    except RuntimeError:
+        text = get("https://query2.finance.yahoo.com" + path)  # Yahoo's second host, sometimes up when the first is busy
     res = json.loads(text)["chart"]["result"][0]
     closes = res["indicators"]["quote"][0].get("close") or []
     out = {}
