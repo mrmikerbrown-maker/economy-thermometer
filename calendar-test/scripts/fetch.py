@@ -137,6 +137,7 @@ def save_history(events):
 
 
 def main():
+    os.makedirs(os.path.dirname(OUT), exist_ok=True)
     now = datetime.now(timezone.utc)
     start, end = week_window(now)
     events, used, errors = None, None, []
