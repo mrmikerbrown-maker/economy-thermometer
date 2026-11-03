@@ -1,0 +1,16 @@
+name: Calendar source test (temporary)
+on:
+  push:
+    branches: [claude/project-thread-nyd994]
+  workflow_dispatch:
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: TradingView calendar
+        run: |
+          curl -sS -m 30 -w "\nHTTP %{http_code}\n" -H "Origin: https://www.tradingview.com" -H "User-Agent: Mozilla/5.0" \
+            "https://economic-calendar.tradingview.com/events?from=2026-11-02T00:00:00.000Z&to=2026-11-07T00:00:00.000Z&countries=US,EU,GB,JP,CA,AU,NZ,CH,NO,SE&minImportance=1" | head -c 3000
+      - name: ForexFactory weekly feed
+        run: |
+          curl -sS -m 30 -w "\nHTTP %{http_code}\n" -A "economy-thermometer-bot" "https://nfs.faireconomy.media/ff_calendar_thisweek.json" | head -c 3000
