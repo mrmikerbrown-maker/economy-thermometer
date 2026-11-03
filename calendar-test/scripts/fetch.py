@@ -38,11 +38,12 @@ def week_window(now):
 def short_period(p):
     if not p:
         return ""
-    return re.sub(r"\.?\s*\d{4}$", "", p).replace(".", "").strip()
+    p = re.sub(r"\.?\s*\d{4}$", "", p.strip()).replace(".", "").strip().rstrip(",").strip()
+    return "" if re.match(r"^[A-Z][a-z]{2} \d{1,2}$", p) else p  # "Nov 4" on a decision day says nothing
 
 
 def is_rate(title, unit):
-    return unit == "%" and re.search(r"interest rate|rate decision|cash rate|bank rate|policy rate|refinancing", title, re.I) is not None
+    return unit == "%" and not re.search(r"cpi|inflation|mortgage", title, re.I) and re.search(r"interest rate|rate decision|cash rate|bank rate|policy rate|refinancing", title, re.I) is not None
 
 
 def fetch_tradingview(start, end):
@@ -111,6 +112,29 @@ def fetch_forexfactory(start, end):
     return out
 
 
+# Medium releases are kept only if they have a consensus and aren't noise
+NOISE = re.compile(r"bill auction|bond auction|note auction|MBA |USDA|rig count|ethanol|foreign exchange reserves|"
+                   r"car sales|truck sales|car registrations|SEB housing|foreign (stock|bond) investment|bond investment", re.I)
+
+
+BANK = {"US": "Fed", "EU": "ECB", "GB": "BoE", "JP": "BoJ", "CA": "BoC", "AU": "RBA", "NZ": "RBNZ",
+        "CH": "SNB", "NO": "Norges Bank", "SE": "Riksbank"}
+
+
+def tidy(e):
+    """Central bank decisions: always key, with a plain name."""
+    if e["rate"] and e["c"] in BANK:
+        e["imp"] = 2
+        e["name"] = BANK[e["c"]] + " rate decision"
+    return e
+
+
+def keep(e):
+    if e["imp"] == 2:
+        return True
+    return e["forecast"] is not None and not NOISE.search(e["name"])
+
+
 SOURCES = [("TradingView", fetch_tradingview), ("ForexFactory", fetch_forexfactory)]
 
 
@@ -143,7 +167,7 @@ def main():
     events, used, errors = None, None, []
     for name, fn in SOURCES:
         try:
-            ev = fn(start, end)
+            ev = [e for e in map(tidy, fn(start, end)) if keep(e)]
             if ev:
                 events, used = ev, name
                 break
